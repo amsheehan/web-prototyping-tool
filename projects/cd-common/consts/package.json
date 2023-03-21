@@ -1,10 +1,6 @@
 {
   "sideEffects": false,
   "ngPackage": {
-    "lib": {
-      "umdModuleIds": {
-        "cd-interfaces": "cd-interfaces"
-      }
-    }
+    "lib": {}
   }
 }

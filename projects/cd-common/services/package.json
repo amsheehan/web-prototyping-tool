@@ -1,10 +1,6 @@
 {
   "sideEffects": false,
   "ngPackage": {
-    "lib": {
-      "umdModuleIds": {
-        "cd-utils/files": "cd-utils/files"
-      }
-    }
+    "lib": {}
   }
 }

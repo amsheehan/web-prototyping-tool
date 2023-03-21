@@ -37,7 +37,6 @@ interface IToastRef {
   selector: 'cd-toast-manager',
   templateUrl: './toast-manager.component.html',
   styleUrls: ['./toast-manager.component.scss'],
-  entryComponents: [ToastComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ToastManagerComponent {

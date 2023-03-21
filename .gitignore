@@ -31,6 +31,7 @@ backend-services/screenshot/screenshot-server/web-prototyping-tool
 !.vscode/*.code-snippets
 
 # misc
+/.angular/cache
 /.sass-cache
 /connect.lock
 /coverage
