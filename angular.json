@@ -1037,7 +1037,6 @@
       }
     }
   },
-  "defaultProject": "web-prototyping-tool",
   "schematics": {
     "@schematics/angular:component": {
       "changeDetection": "OnPush",
@@ -1046,6 +1045,6 @@
   },
   "cli": {
     "analytics": false,
-    "defaultCollection": "@angular-eslint/schematics"
+    "schematicCollections": ["@angular-eslint/schematics"]
   }
 }
