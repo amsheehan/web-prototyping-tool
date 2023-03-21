@@ -116,7 +116,6 @@
     }
   },
   "dependencies": {
-    "@angular/animations": "^14.3.0",
     "@angular/cdk": "^11.2.13",
     "@angular/common": "^14.3.0",
     "@angular/compiler": "^14.3.0",
@@ -149,10 +148,10 @@
     "zone.js": "~0.11.4"
   },
   "devDependencies": {
+    "@angular-eslint/builder": "^15.2.1",
     "@angular-devkit/build-angular": "^14.2.11",
     "@angular-devkit/core": "^14.2.11",
     "@angular-devkit/schematics": "^14.2.11",
-    "@angular-eslint/builder": "12.0.0",
     "@angular-eslint/eslint-plugin": "12.0.0",
     "@angular-eslint/eslint-plugin-template": "12.0.0",
     "@angular-eslint/schematics": "12.3.1",
