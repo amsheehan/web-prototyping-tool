@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type firebase from 'firebase/app';
+import type { Timestamp } from 'firebase/firestore';
+
 import { IBaseDocument, IBaseDocumentMetadata } from './database';
 
 export enum PublishType {
@@ -26,7 +27,7 @@ export enum PublishType {
 export interface IPublishVersion {
   id: string;
   name: string;
-  createdAt: firebase.firestore.Timestamp;
+  createdAt: Timestamp;
   projectId: string;
 
   // If this version is for a published symbol or code component, this is its id within the project

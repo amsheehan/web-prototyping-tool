@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IValue } from '.';
+import type { IValue } from './public_api';
 
 /**
  * Notes: Potential Triggers

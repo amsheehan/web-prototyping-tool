@@ -19,7 +19,7 @@ import { ICodeComponentDocument } from './code-component';
 import { ProjectDataset } from './dataset';
 import { IDesignSystemDocument } from './design';
 import { EntityType } from './entity-types';
-import { IUserIdentity, RecursivePartial } from './index';
+import { IUserIdentity, RecursivePartial } from './public_api';
 import { IProject, IChangeMarker } from './project';
 import { PropertyModel } from './property-models';
 

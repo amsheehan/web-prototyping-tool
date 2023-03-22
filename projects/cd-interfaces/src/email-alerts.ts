@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUser } from './index';
+import { IUser } from './public_api';
 import { ICommentDocument } from './comment';
 
 export enum RecipientIsProjectOwner {

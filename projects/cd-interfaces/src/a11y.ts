@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IKeyValue } from './index';
+import { IKeyValue } from './public_api';
 import { PropertyInput } from './properties';
 
 /** Unique a11y properties for key/value */

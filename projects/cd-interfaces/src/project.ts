@@ -24,12 +24,12 @@ import { ICodeComponentDocument } from './code-component';
 import { ProjectDataset } from './dataset';
 import { IBoardProperties } from './component-instances';
 import { ISymbolProperties } from './symbols';
-import type firebase from 'firebase/app';
 import { ChangePayload } from './project-changes';
+import type { Timestamp } from 'firebase/firestore';
 
 export interface IChangeMarker {
   id: string;
-  timestamp: firebase.firestore.Timestamp;
+  timestamp: Timestamp;
 }
 
 export interface IBaseProjectDocument extends IBaseDocument {

@@ -18,7 +18,7 @@ import { IPropertyGroup, IOutputProperty, PropertyValue } from './properties';
 import { IComponentFactory } from './component-instances';
 import { ComponentIdentity } from './entity-types';
 import { TemplateFunction } from './templates';
-import { IStringMap } from './index';
+import { IStringMap } from './public_api';
 import { IStyleDeclaration } from './style-declaration';
 
 /**

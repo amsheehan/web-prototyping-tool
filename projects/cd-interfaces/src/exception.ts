@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type firebase from 'firebase/app';
+import type { Timestamp } from 'firebase/firestore';
 import { IBaseDocument } from './database';
 
 export const CODE_COMPONENT_ERROR_PREFIX = 'Error in Code Component: ';
@@ -24,5 +24,5 @@ export interface IExceptionEvent extends IBaseDocument {
   message: string;
   messageHash: string;
   stack?: string;
-  createdAt: firebase.firestore.Timestamp;
+  createdAt: Timestamp;
 }

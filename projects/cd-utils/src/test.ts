@@ -19,21 +19,4 @@
 import 'zone.js';
 import 'zone.js/testing';
 
-declare const require: {
-  context(
-    path: string,
-    deep?: boolean,
-    filter?: RegExp
-  ): {
-    keys(): string[];
-    <T>(id: string): T;
-  };
-};
-
 console.log('Setting up tests for cd-utils');
-
-// First, initialize the Angular testing environment.
-// Then we find all the tests.
-const context = require.context('../', true, /\.spec\.ts$/);
-// And load the modules.
-context.keys().map(context);

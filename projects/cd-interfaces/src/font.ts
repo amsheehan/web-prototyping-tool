@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { Units, IValue } from './index';
+import type { Units, IValue } from './public_api';
 
 export interface IFontFamily {
   readonly family: string;

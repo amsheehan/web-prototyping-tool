@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import type { Timestamp } from 'firebase/firestore';
 import { Pipe, PipeTransform } from '@angular/core';
-import type firebase from 'firebase/app';
 import dayjs from 'dayjs';
 import { isToday, convertTimestampToNumber } from 'cd-common/utils';
 
@@ -25,7 +25,7 @@ const DEFAULT_DATE_FORMAT = 'MMM D, YYYY';
 @Pipe({ name: 'FormatFirebaseTime' })
 export class FormatFirebaseTime implements PipeTransform {
   transform(
-    timestamp: firebase.firestore.Timestamp | number | string | undefined,
+    timestamp: Timestamp | number | string | undefined,
     ignoreTime?: any
   ): string | undefined {
     if (!timestamp) return;

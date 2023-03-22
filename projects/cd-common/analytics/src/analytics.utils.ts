@@ -16,7 +16,7 @@
 
 import { isDataBoundValue, isElementDataBoundValue } from 'cd-common/utils';
 import { DatasetType } from 'cd-interfaces';
-import { AnalyticsEventType, AnalyticsEvent, IAnalyticsEventParams } from './index';
+import { AnalyticsEventType, AnalyticsEvent, IAnalyticsEventParams } from './public_api';
 import * as data from './data';
 
 /**

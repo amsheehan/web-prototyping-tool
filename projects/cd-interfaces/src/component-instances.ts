@@ -16,18 +16,17 @@
 
 /* eslint-disable max-lines */
 
+import type { Timestamp } from 'firebase/firestore';
 import { IStyleAttributes, State } from './css';
 import { ComponentIdentity, ElementEntitySubType, EntityType } from './entity-types';
 import { IProjectContentDocument } from './project';
-import { IKeyValue, IValue, ILockingRect, IDataBoundValue } from './index';
-import type firebase from 'firebase/app';
+import { Position, IKeyValue, IValue, ILockingRect, IDataBoundValue } from './public_api';
 import type { ThemePalette } from '@angular/material/core';
 import type { ProgressSpinnerMode } from '@angular/material/progress-spinner';
 import type {
   MatAccordionDisplayMode,
   MatAccordionTogglePosition,
 } from '@angular/material/expansion';
-import { Position } from './';
 import { ActionBehavior } from './interaction';
 import { IA11yAttr } from './a11y';
 import { IComponent } from './component';
@@ -115,7 +114,7 @@ export type IComponentFactory = new (
 ) => IComponentInstance;
 
 export interface IRootElementProperties extends IComponentInstance {
-  lastScreenshotTime?: firebase.firestore.Timestamp;
+  lastScreenshotTime?: Timestamp;
 }
 
 // Board portal and symbol instances extend this interface

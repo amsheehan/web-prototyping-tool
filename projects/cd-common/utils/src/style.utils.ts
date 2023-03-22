@@ -24,7 +24,7 @@ export const getElementBaseStyles = (
 };
 
 export const assignBaseStyles = (element: cd.PropertyModel, style: cd.IStyleDeclaration) => {
-  Object.assign(element.styles.base.style, style);
+  Object.assign(element.styles.base.style ?? {}, style);
 };
 
 export const baseStylesPartial = (style: cd.IStyleDeclaration) => {

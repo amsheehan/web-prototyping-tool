@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-import { IRect, IUser } from './index';
-import type firebase from 'firebase/app';
+import type { Timestamp } from 'firebase/firestore';
+import { IRect, IUser } from './public_api';
 import { ICanvas } from './canvas';
 import { IRenderResult } from './render-results';
 
@@ -30,10 +30,10 @@ export interface IUserPresence {
   projectId: string;
 
   /** The time at which this session started */
-  creationTime: firebase.firestore.Timestamp;
+  creationTime: Timestamp;
 
   /** Last time that this session polled to mark presence as active */
-  pollTime: firebase.firestore.Timestamp;
+  pollTime: Timestamp;
 }
 
 export interface IUserCursor {

@@ -38,6 +38,12 @@ export * from './mark-selected/mark-checked.pipe';
 export * from './mark-selected/mark-selected.pipe';
 export * from './safe-html/safe-html.pipe';
 export * from './safe-url/safe-url.pipe';
+export * from './a11y/a11y.pipe';
+export * from './analytics-params/analytics-params.pipe';
+export * from './avatar/avatar-pipe.pipe';
+export * from './ivalue/ivalue.pipe';
+export * from './menu-items/properties-menu-items.pipe';
+export * from './strings/strings.pipe';
 
 export { TranslateSVGFrame, RectToSVGStyle, IRectToSVGStyle } from './svg/svg.pipe';
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type firebase from 'firebase/app';
+import type { Timestamp } from 'firebase/firestore';
 import { ScreenshotSizes } from './public_api';
 import { DimensionToArgs } from './image';
 
@@ -24,7 +24,7 @@ export interface IScreenshotRef {
 }
 
 export interface IScreenshotLookup extends IScreenshotRef {
-  timestamp: firebase.firestore.Timestamp;
+  timestamp: Timestamp;
 }
 
 export enum TaskType {

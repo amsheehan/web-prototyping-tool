@@ -15,7 +15,7 @@
  */
 
 import { ElementEntitySubType } from './entity-types';
-import { IStringMap, IRect, ILockingRect } from './index';
+import { IStringMap, IRect, ILockingRect } from './public_api';
 import { GreenlineType, IElementA11yInfo } from './a11y';
 
 export type RenderRectMap = Map<string, IRenderResult>;

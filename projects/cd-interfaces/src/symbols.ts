@@ -20,7 +20,7 @@ import {
   IRootInstanceProperties,
 } from './component-instances';
 import { ElementEntitySubType } from './entity-types';
-import { IStringMap, RecursivePartial } from './index';
+import { IStringMap, RecursivePartial } from './public_api';
 import { PropertyModel } from './property-models';
 import { IPublishable } from './publish';
 import { IElementChangePayload } from './project-changes';

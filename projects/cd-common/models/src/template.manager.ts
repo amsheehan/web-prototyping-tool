@@ -141,7 +141,7 @@ export const assembleTemplatesWithCSSForExport = (
     const elemStyles = deepCopy(curr.styles);
     // For Boards we want to set the dimension to that of the frame
     if (isBoard(curr)) {
-      Object.assign(elemStyles.base.style, {
+      Object.assign(elemStyles.base.style ?? {}, {
         width: createPixelIValue(curr.frame.width),
         height: createPixelIValue(curr.frame.height),
       });

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IStringMap, Units, IValue, IKeyValue } from './index';
+import { IStringMap, Units, IValue, IKeyValue } from './public_api';
 import { IStyleDeclaration } from './style-declaration';
 
 export type OverflowStyle = 'auto' | 'scroll' | 'hidden' | 'visible';

@@ -197,7 +197,7 @@ const mergeInstanceIntoSymbol = (
     clone.styles[key] = styles;
   }
   const display = mergeDisplayValues(instanceProps, symbolProps);
-  Object.assign(clone.styles.base.style, { display });
+  Object.assign(clone.styles.base.style ?? {}, { display });
   return clone;
 };
 

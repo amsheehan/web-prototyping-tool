@@ -16,9 +16,7 @@
 
 /* eslint-disable max-lines */
 import * as cd from 'cd-interfaces';
-import * as firestore from '@angular/fire/firestore';
-import firebase from 'firebase/app';
-import 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 import { DEFAULT_PROJECT_TYPE, FRACTIONAL_INDEX_PROP, PARENT_ID_PROP } from 'cd-common/consts';
 import { Theme, themeFromId } from 'cd-themes';
 import { createId } from 'cd-utils/guid';
@@ -31,17 +29,14 @@ import {
 
 export const createChangeMarker = (): cd.IChangeMarker => {
   const id = createId();
-  const timestamp = firebase.firestore.Timestamp.now();
+  const timestamp = Timestamp.now();
   return { id, timestamp };
 };
 
 /** It is possible that timestamps have been serialized and need to recreated to be actual Timestamp instances */
-export const isTimestampOlder = (
-  timestamp: firebase.firestore.Timestamp,
-  comparison: firebase.firestore.Timestamp
-): boolean => {
-  const t1 = new firebase.firestore.Timestamp(timestamp.seconds, timestamp.nanoseconds);
-  const t2 = new firebase.firestore.Timestamp(comparison.seconds, comparison.nanoseconds);
+export const isTimestampOlder = (timestamp: Timestamp, comparison: Timestamp): boolean => {
+  const t1 = new Timestamp(timestamp.seconds, timestamp.nanoseconds);
+  const t2 = new Timestamp(comparison.seconds, comparison.nanoseconds);
   return t1 < t2;
 };
 
@@ -84,9 +79,7 @@ export const payloadIsDefined = (
   return !!payload;
 };
 
-export const convertChangeType = (
-  docChangeType: firestore.DocumentChangeType
-): cd.FirestoreChangeType => {
+export const convertChangeType = (docChangeType: any): cd.FirestoreChangeType => {
   if (docChangeType === cd.FirestoreChangeType.Added) return cd.FirestoreChangeType.Added;
   if (docChangeType === cd.FirestoreChangeType.Modified) return cd.FirestoreChangeType.Modified;
   return cd.FirestoreChangeType.Removed;
@@ -263,7 +256,7 @@ export const createDesignSystemDocument = (
  * that already has document data retrieved along with the type of change
  */
 export const filterProcessedDatabaseChanges = (
-  changes: firestore.DocumentChangeAction<cd.IProjectContentDocument>[],
+  changes: any[],
   processedChangeIds: Set<string>
 ): cd.DatabaseChangeTuple[] => {
   return changes.reduce<cd.DatabaseChangeTuple[]>((acc, currChange) => {
@@ -573,7 +566,7 @@ export const addChangeMarkerToUpdates = (
 
 const createProjectUpdateAtPayload = (
   projectId: string,
-  updatedAt: firebase.firestore.Timestamp
+  updatedAt: Timestamp
 ): cd.IProjectChangePayload => {
   const type = cd.EntityType.Project;
   const updates: cd.IUpdateChange<cd.IProject>[] = [{ id: projectId, update: { updatedAt } }];
@@ -724,7 +717,7 @@ const getDeleteChange = (
  */
 export const calcDeletesFromRemote = (
   currentContent: cd.IProjectContent,
-  remoteContent: firestore.DocumentChangeAction<cd.IProjectContentDocument>[]
+  remoteContent: any[]
 ): cd.ChangePayload[] => {
   const idsInRemote = new Set(remoteContent.map((a) => a.payload.doc.id));
   const { Element, DesignSystem, Asset, Dataset, CodeComponent } = cd.EntityType;

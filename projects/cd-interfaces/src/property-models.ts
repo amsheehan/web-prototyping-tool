@@ -15,7 +15,7 @@
  */
 
 import { IBoardProperties, IComponentInstance } from './component-instances';
-import { IStringMap, ReadonlyRecord, RecursivePartial } from './index';
+import { IStringMap, ReadonlyRecord, RecursivePartial } from './public_api';
 import { ISymbolInstanceProperties, ISymbolProperties } from './symbols';
 import { ICodeComponentDocument } from './code-component';
 import { IElementChangePayload } from './project-changes';

@@ -26,7 +26,7 @@
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": true,
-    "target": "es2020",
+    "target": "ES2022",
     "paths": {
       "cd-interfaces": ["dist/cd-interfaces"],
       "cd-common": ["projects/cd-common/src/public_api"],
@@ -45,7 +45,8 @@
       "cd-themes/*": ["dist/cd-themes/*"],
       "cd-utils": ["dist/cd-utils"],
       "cd-utils/*": ["dist/cd-utils/*"]
-    }
+    },
+    "useDefineForClassFields": false
   },
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,

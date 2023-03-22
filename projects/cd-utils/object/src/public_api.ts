@@ -137,14 +137,14 @@ export const deepCopy = <T>(obj: T): T => {
     return ret as unknown as T;
   }
 
-  return Object.entries(obj).reduce((acc: any, [key, value]) => {
+  return Object.entries(obj as any).reduce((acc: any, [key, value]) => {
     acc[key] = deepCopy(value);
     return acc;
   }, {} as T);
 };
 
 export const classToObject = <T>(cl: T) => {
-  return Object.entries(cl).reduce((acc: any, currentEntry) => {
+  return Object.entries(cl as any).reduce((acc: any, currentEntry) => {
     const [key, value] = currentEntry;
     if (!isFunction(value)) {
       acc[key] = value;

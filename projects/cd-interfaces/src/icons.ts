@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import type { IValue } from './index';
+import type { IValue } from './public_api';
 
 export interface IIcon {
   id: string;

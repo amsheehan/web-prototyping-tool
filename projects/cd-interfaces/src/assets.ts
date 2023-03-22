@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { AssetSizes, IStringMap } from './index';
+import { AssetSizes, IStringMap } from './public_api';
 import { EntityType } from './entity-types';
 import { IProjectContentDocument } from './project';
 import { ImageMime } from './files';

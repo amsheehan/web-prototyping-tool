@@ -18,7 +18,7 @@ import { IPropertiesUpdatePayload, PropertyModel } from './property-models';
 import { PropertyType } from './property-type';
 import { IGenericListConfig } from './generic-list';
 import { IGenericConfig } from './component-instances';
-import { IRichTooltip, IStringMap, IValue } from './index';
+import { IRichTooltip, IStringMap, IValue } from './public_api';
 import { IIconOptionsConfig } from './icons';
 
 export type Primitive = string | number | boolean | undefined;

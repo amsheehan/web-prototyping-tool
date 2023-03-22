@@ -1,4 +1,4 @@
-@import 'functions';
+@use 'functions' as *;
 
 $cd-font-font-family: 'Google Sans', 'Roboto', sans-serif;
 $cd-font-font-family-display: var(--cd-header-font);

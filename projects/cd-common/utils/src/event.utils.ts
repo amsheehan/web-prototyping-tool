@@ -18,6 +18,8 @@ import { HIDDEN_ATTR } from 'cd-common/consts';
 import { fromEvent, Observable } from 'rxjs';
 import { map, filter } from 'rxjs/operators';
 
+type VisibilityState = any;
+
 export const getDocumentVisibilityEvent$ = (doc?: HTMLDocument): Observable<boolean> => {
   return fromEvent<VisibilityState>(doc || document, 'visibilitychange').pipe(
     map(() => document.visibilityState),

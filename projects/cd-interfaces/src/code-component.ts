@@ -21,7 +21,7 @@ import { IPublishable } from './publish';
 import { IScreenshotable } from './database';
 import { IBaseElementInputs, IComponentInstance } from './component-instances';
 import { PropertyValue } from './properties';
-import { ILockingRect } from './index';
+import { ILockingRect } from './public_api';
 import { IFontFamily } from './font';
 
 /**

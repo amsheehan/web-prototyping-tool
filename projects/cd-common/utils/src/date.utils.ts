@@ -15,9 +15,9 @@
  */
 
 import dayjs from 'dayjs';
+import { Timestamp } from 'firebase/firestore';
 import { isNumber } from 'cd-utils/numeric';
 import { isString } from 'cd-utils/string';
-import firebase from 'firebase/app';
 
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -27,16 +27,11 @@ export const isToday = (timestamp: number | dayjs.Dayjs): boolean => {
   return datetimeObj.isSame(now, 'day');
 };
 
-export const convertTimestampToNumber = (
-  timestamp: firebase.firestore.Timestamp | number | string
-): number => {
+export const convertTimestampToNumber = (timestamp: Timestamp | number | string): number => {
   if (isNumber(timestamp)) return timestamp as number;
   if (isString(timestamp)) return new Date(timestamp as string).getTime();
-  const firebaseTimestamp = timestamp as firebase.firestore.Timestamp;
-  return new firebase.firestore.Timestamp(
-    firebaseTimestamp.seconds,
-    firebaseTimestamp.nanoseconds
-  ).toMillis();
+  const firebaseTimestamp = timestamp as Timestamp;
+  return new Timestamp(firebaseTimestamp.seconds, firebaseTimestamp.nanoseconds).toMillis();
 };
 
 /** Convert date into simplied ISO date string. e.g. 2020-06-15 */

@@ -89,3 +89,5 @@ export {
   LAYERS_NODE_DROP_GUTTER_WIDTH,
   insertElements,
 } from './properties.insert.utils';
+export * from './render-switch-directive/render-switch.directive';
+export * from './render-switch-directive/render-switch.module';

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-import type firebase from 'firebase/app';
+import type { Timestamp } from 'firebase/firestore';
 
 export interface INewsItem {
   title: string;
-  date: firebase.firestore.Timestamp;
+  date: Timestamp;
   details: string;
 }

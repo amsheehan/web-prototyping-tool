@@ -15,7 +15,7 @@
  */
 
 import { ElementPropertiesMap } from './property-models';
-import { IStringMap } from './index';
+import { IStringMap } from './public_api';
 
 export interface ITemplateTextNode {
   value: string;

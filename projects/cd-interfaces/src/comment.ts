@@ -16,7 +16,7 @@
 
 import { IProjectContentDocument } from './project';
 import { EntityType } from './entity-types';
-import { IUser, IUserIdentity } from './index';
+import { IUser, IUserIdentity } from './public_api';
 import { ITaggableTextFieldNode } from './taggable-text-field';
 
 export interface INewCommentThread {

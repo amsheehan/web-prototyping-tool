@@ -21,12 +21,12 @@ import { IDesignSystemDocument } from './design';
 import { ICommentThreadDocument, ICommentDocument } from './comment';
 import { IUserSettings } from './user';
 import { IPublishEntry } from './publish';
-import type firebase from 'firebase/app';
-import { IUserIdentity } from './index';
+import { IUserIdentity } from './public_api';
 import { IExceptionEvent } from './exception';
 import { IScreenshotTask } from './screenshots';
 import { ICodeComponentDocument } from './code-component';
 import { ProjectDataset } from './dataset';
+import type { Timestamp } from 'firebase/firestore';
 
 export interface IBaseDocument {
   id: string;
@@ -41,12 +41,12 @@ export interface IBaseDocumentMetadata {
   creator: IUserIdentity;
   /** A list of email addresses */
   editors?: string[];
-  createdAt: firebase.firestore.Timestamp;
-  updatedAt: firebase.firestore.Timestamp;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
 export interface IScreenshotable {
-  lastScreenshotTime?: firebase.firestore.Timestamp;
+  lastScreenshotTime?: Timestamp;
 }
 
 export type CdDatabaseDocument =

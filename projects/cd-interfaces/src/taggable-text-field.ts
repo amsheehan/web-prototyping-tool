@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { IUser } from './index';
+import { IUser } from './public_api';
 
 export enum TextFieldElementType {
   Break = 'break',

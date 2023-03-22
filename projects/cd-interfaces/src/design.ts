@@ -15,7 +15,7 @@
  */
 
 import { IFontFamily, ITypographyStyle } from './font';
-import { IStringMap, Units } from './index';
+import { IStringMap, Units } from './public_api';
 import { IProjectContentDocument } from './project';
 import { EntityType } from './entity-types';
 
