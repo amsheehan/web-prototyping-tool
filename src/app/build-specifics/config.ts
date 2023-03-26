@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import { AngularFirestore } from '@angular/fire/firestore';
-import { FIREBASE_OPTIONS, AngularFireModule } from '@angular/fire';
-import { AngularFireStorage } from '@angular/fire/storage';
-import { AngularFireAuth } from '@angular/fire/auth';
-import { AngularFirestoreMock } from '../services/mocks/angular-firestore.mock.service';
-import { AngularFireAuthMock } from '../database/test/angular-fire-auth.mock.service';
-import { AngularFireStorageMock } from '../database/test/angular-fire-storage.mock.service';
-import { environment } from 'src/environments/environment';
+// import { AngularFirestore } from '@angular/fire/firestore';
+// import { FIREBASE_OPTIONS, AngularFireModule } from '@angular/fire';
+// import { AngularFireStorage } from '@angular/fire/storage';
+// import { AngularFireAuth } from '@angular/fire/auth';
+// import { AngularFirestoreMock } from '../services/mocks/angular-firestore.mock.service';
+// import { AngularFireAuthMock } from '../database/test/angular-fire-auth.mock.service';
+// import { AngularFireStorageMock } from '../database/test/angular-fire-storage.mock.service';
+// import { environment } from 'src/environments/environment';
 import { AbstractStorageService } from '../services/storage/abstract-storage.service';
 import { FireStorageService } from '../services/storage/fire-storage.service';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
@@ -30,21 +30,21 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 export const mockModules = [];
 
 export const mockProviders = [
-  { provide: AngularFirestore, useClass: AngularFirestoreMock },
-  { provide: AngularFireAuth, useClass: AngularFireAuthMock },
-  { provide: AngularFireStorage, useClass: AngularFireStorageMock },
-  { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
+  //   { provide: AngularFirestore, useClass: AngularFirestoreMock },
+  //   { provide: AngularFireAuth, useClass: AngularFireAuthMock },
+  //   { provide: AngularFireStorage, useClass: AngularFireStorageMock },
+  //   { provide: FIREBASE_OPTIONS, useValue: environment.firebase },
 ];
 
 // Dev modules config
 export const devModules = [
-  AngularFireModule.initializeApp(environment.firebase),
+  // AngularFireModule.initializeApp(environment.firebase),
   StoreDevtoolsModule.instrument({ maxAge: 25 }),
 ];
 
 export const devProviders = [{ provide: AbstractStorageService, useClass: FireStorageService }];
 
 // Prod modules config
-export const prodModules = [AngularFireModule.initializeApp(environment.firebase)];
+// export const prodModules = [AngularFireModule.initializeApp(environment.firebase)];
 
 export const prodProviders = [{ provide: AbstractStorageService, useClass: FireStorageService }];

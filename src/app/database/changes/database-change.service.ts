@@ -32,6 +32,7 @@ import { DuplicateService } from 'src/app/services/duplicate/duplicate.service';
 import { map, switchMap } from 'rxjs/operators';
 import { DEFAULT_PROJECT_TYPE } from 'cd-common/consts';
 import { generateKeywordsForPublishEntry } from 'cd-common/utils';
+import { DocumentData } from 'firebase/firestore';
 
 /**
  * Abstraction layer for all writes to the database
@@ -99,17 +100,17 @@ export class DatabaseChangesService {
   /** Set a project document */
 
   /** Update a project */
-  updateProject(projectId: string, changes: Partial<cd.IProject>) {
+  async updateProject(projectId: string, changes: Partial<cd.IProject>) {
     const projectPath = projectPathForId(projectId);
     const updatedAt = DatabaseService.getTimestamp();
     const update = { ...changes, updatedAt };
-    return this.databaseService.updateDocument(projectPath, update);
+    return await this.databaseService.updateDocument(projectPath, update);
   }
 
   /** Delete a project */
-  deleteProject(projectId: string) {
+  async deleteProject(projectId: string) {
     const projectPath = projectPathForId(projectId);
-    return this.databaseService.deleteDocument(projectPath);
+    return await this.databaseService.deleteDocument(projectPath);
   }
 
   //#endregion
@@ -117,27 +118,27 @@ export class DatabaseChangesService {
   //#region Element changes
 
   /** Update elements */
-  updateElements(
+  async updateElements(
     elementProperties: cd.ElementPropertiesMap,
     updates: cd.IPropertiesUpdatePayload[]
   ) {
     const [writes] = calcDatabaseUpdates(elementProperties, undefined, [], updates);
-    return this.databaseService.batchChanges(writes);
+    return await this.databaseService.batchChanges(writes);
   }
 
   /** Delete elements */
-  deleteElements(
+  async deleteElements(
     project: cd.IProject,
     elementProperties: cd.ElementPropertiesMap,
     deletions: cd.PropertyModel[],
     updates: cd.IPropertiesUpdatePayload[] = []
   ) {
     const [writes, deletes] = calcDatabaseUpdates(elementProperties, project, deletions, updates);
-    return this.databaseService.batchChanges(writes, deletes);
+    return await this.databaseService.batchChanges(writes, deletes);
   }
 
   /** Perfrom create, update, and delete operations together */
-  modifyElements(
+  async modifyElements(
     project: cd.IProject,
     elementProperties: cd.ElementPropertiesMap,
     creates: cd.PropertyModel[] = [],
@@ -146,11 +147,11 @@ export class DatabaseChangesService {
   ) {
     const allModels = [...creates, ...deletions];
     const [writes, deletes] = calcDatabaseUpdates(elementProperties, project, allModels, updates);
-    return this.databaseService.batchChanges(writes, deletes);
+    return await this.databaseService.batchChanges(writes, deletes);
   }
 
   /** Write all elements in ElementPropertiesMap and delete all deleteIds */
-  syncAllElements(
+  async syncAllElements(
     project: cd.IProject,
     elementProperties: cd.ElementPropertiesMap,
     deleteIds: Set<string>
@@ -159,7 +160,7 @@ export class DatabaseChangesService {
     const [writes] = calcDatabaseUpdates(elementProperties, project, allModels);
     const deletePaths = Array.from(deleteIds).map((id) => projectContentsPathForId(id));
     const deletes = new Set(deletePaths);
-    return this.databaseService.batchChanges(writes, deletes);
+    return await this.databaseService.batchChanges(writes, deletes);
   }
 
   //#endregion
@@ -167,28 +168,28 @@ export class DatabaseChangesService {
   //#region Code component changes
 
   /** Create new code component */
-  createCodeComponents(codeComponents: cd.ICodeComponentDocument[]) {
+  async createCodeComponents(codeComponents: cd.ICodeComponentDocument[]) {
     const batchPayload: cd.WriteBatchPayload = new Map();
     for (const cmp of codeComponents) {
       const path = projectContentsPathForId(cmp.id);
       batchPayload.set(path, cmp);
     }
-    return this.databaseService.batchChanges(batchPayload);
+    return await this.databaseService.batchChanges(batchPayload);
   }
 
   /**
    * Update code component
    * TODO: support partial updates
    */
-  updateCodeComponent(codeComponent: cd.ICodeComponentDocument) {
+  async updateCodeComponent(codeComponent: cd.ICodeComponentDocument) {
     const path = projectContentsPathForId(codeComponent.id);
-    return this.databaseService.setDocument(path, codeComponent);
+    return await this.databaseService.setDocument(path, codeComponent);
   }
 
   /** Delete code component */
-  deleteCodeComponent(codeComponent: cd.ICodeComponentDocument) {
+  async deleteCodeComponent(codeComponent: cd.ICodeComponentDocument) {
     const path = projectContentsPathForId(codeComponent.id);
-    return this.databaseService.deleteDocument(path);
+    return await this.databaseService.deleteDocument(path);
   }
 
   //#endregion
@@ -196,18 +197,18 @@ export class DatabaseChangesService {
   //#region Design system changes
 
   /** Create design system */
-  createDesignSystem(designSystem: cd.IDesignSystemDocument): Promise<void> {
+  async createDesignSystem(designSystem: cd.IDesignSystemDocument): Promise<DocumentData> {
     const databasePath = projectContentsPathForId(designSystem.id);
-    return this.databaseService.setDocument(databasePath, designSystem);
+    return await this.databaseService.setDocument(databasePath, designSystem);
   }
 
   /**
    * Update design system.
    * TODO: this should eventually be updatd to handle a partial
    */
-  updateDesignSystem(designSystem: cd.IDesignSystemDocument) {
+  async updateDesignSystem(designSystem: cd.IDesignSystemDocument) {
     const databasePath = projectContentsPathForId(designSystem.id);
-    return this.databaseService.setDocument(databasePath, designSystem);
+    return await this.databaseService.setDocument(databasePath, designSystem);
   }
 
   //#endregion
@@ -215,28 +216,28 @@ export class DatabaseChangesService {
   //#region Dataset changes
 
   /** Create dataset */
-  createDatasets(datasets: cd.ProjectDataset[]) {
+  async createDatasets(datasets: cd.ProjectDataset[]) {
     const batchPayload: cd.WriteBatchPayload = new Map();
     for (const dataset of datasets) {
       const path = projectContentsPathForId(dataset.id);
       batchPayload.set(path, dataset);
     }
-    return this.databaseService.batchChanges(batchPayload);
+    return await this.databaseService.batchChanges(batchPayload);
   }
 
   /** Update dataset */
-  updateDataset(dataset: cd.ProjectDataset) {
+  async updateDataset(dataset: cd.ProjectDataset) {
     const path = projectContentsPathForId(dataset.id);
-    return this.databaseService.setDocument(path, dataset);
+    return await this.databaseService.setDocument(path, dataset);
   }
 
   /** Update dataset data */
   updateDatasetData() {}
 
   /** Delete dataset */
-  deleteDataset(dataset: cd.ProjectDataset) {
+  async deleteDataset(dataset: cd.ProjectDataset) {
     const path = projectContentsPathForId(dataset.id);
-    return this.databaseService.deleteDocument(path);
+    return await this.databaseService.deleteDocument(path);
   }
 
   //#endregion
@@ -244,19 +245,19 @@ export class DatabaseChangesService {
   //#region Asset changes
 
   /**  */
-  createAssets(assets: cd.IProjectAsset[]) {
+  async reateAssets(assets: cd.IProjectAsset[]) {
     const batchPayload: cd.WriteBatchPayload = new Map();
     for (const assetDoc of assets) {
       const docPath = projectContentsPathForId(assetDoc.id);
       batchPayload.set(docPath, assetDoc);
     }
-    return this.databaseService.batchChanges(batchPayload);
+    return await this.databaseService.batchChanges(batchPayload);
   }
 
   /**  */
-  updateAsset(id: string, update: Partial<cd.IProjectAsset>) {
+  async updateAsset(id: string, update: Partial<cd.IProjectAsset>) {
     const path = projectContentsPathForId(id);
-    return this.databaseService.updateDocument(path, update);
+    return await this.databaseService.updateDocument(path, update);
   }
 
   //#endregion
@@ -264,39 +265,39 @@ export class DatabaseChangesService {
   //#region Comment changes
 
   /**  */
-  createCommentThread(commentThread: cd.ICommentThreadDocument) {
+  async createCommentThread(commentThread: cd.ICommentThreadDocument) {
     const path = commentPathForId(commentThread.id);
-    return this.databaseService.setDocument(path, commentThread);
+    return await this.databaseService.setDocument(path, commentThread);
   }
 
   /**  */
-  updateCommentThread(commentThread: cd.ICommentThreadDocument) {
+  async updateCommentThread(commentThread: cd.ICommentThreadDocument) {
     const path = commentPathForId(commentThread.id);
-    return this.databaseService.updateDocument(path, commentThread);
+    return await this.databaseService.updateDocument(path, commentThread);
   }
 
   /**  */
-  deleteCommentThread(commentThread: cd.ICommentThreadDocument) {
+  async deleteCommentThread(commentThread: cd.ICommentThreadDocument) {
     const path = commentPathForId(commentThread.id);
-    return this.databaseService.deleteDocument(path);
+    return await this.databaseService.deleteDocument(path);
   }
 
   /**  */
-  createComment(comment: cd.ICommentDocument) {
+  async createComment(comment: cd.ICommentDocument) {
     const path = commentPathForId(comment.id);
-    return this.databaseService.setDocument(path, comment);
+    return await this.databaseService.setDocument(path, comment);
   }
 
   /**  */
-  updateComment(comment: cd.ICommentDocument) {
+  async updateComment(comment: cd.ICommentDocument) {
     const path = commentPathForId(comment.id);
-    this.databaseService.updateDocument(path, comment);
+    return await this.databaseService.updateDocument(path, comment);
   }
 
   /**  */
-  deleteComment(comment: cd.ICommentDocument) {
+  async deleteComment(comment: cd.ICommentDocument) {
     const path = commentPathForId(comment.id);
-    return this.databaseService.deleteDocument(path);
+    return await this.databaseService.deleteDocument(path);
   }
 
   //#endregion
@@ -304,22 +305,22 @@ export class DatabaseChangesService {
   //#region Publish entry changes
 
   /** Create publish entry */
-  createPublishEntry(publishEntry: cd.IPublishEntry) {
+  async createPublishEntry(publishEntry: cd.IPublishEntry) {
     const path = publishEntryPathForId(publishEntry.id);
-    return this.databaseService.setDocument(path, publishEntry);
+    return await this.databaseService.setDocument(path, publishEntry);
   }
 
   /** Update publish entry */
-  updatePublishEntry(publishEntry: cd.IPublishEntry, update: cd.PublishEntryUpdatePayload) {
+  async updatePublishEntry(publishEntry: cd.IPublishEntry, update: cd.PublishEntryUpdatePayload) {
     const path = publishEntryPathForId(publishEntry.id);
     const keywords = generateKeywordsForPublishEntry(publishEntry);
-    return this.databaseService.updateDocument(path, { ...update, keywords });
+    return await this.databaseService.updateDocument(path, { ...update, keywords });
   }
 
   /** Delete publish entry */
-  deletePublishEntry(publishEntry: cd.IPublishEntry) {
+  async deletePublishEntry(publishEntry: cd.IPublishEntry) {
     const path = publishEntryPathForId(publishEntry.id);
-    return this.databaseService.deleteDocument(path);
+    return await this.databaseService.deleteDocument(path);
   }
 
   //#endregion

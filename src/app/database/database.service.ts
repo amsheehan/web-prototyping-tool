@@ -1,19 +1,3 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import { BatchChunker } from './batch-chunker.class';
 import {
   FirebaseCollection,
@@ -25,11 +9,30 @@ import { map, first, takeUntil, switchMap, retry, filter, take } from 'rxjs/oper
 import { BatchQueue, detectUndefinedObjects, RETRY_ATTEMPTS } from './database.utils';
 import { Observable, Subject, from, fromEvent } from 'rxjs';
 import { environment } from 'src/environments/environment';
-import firebase from 'firebase/app';
+import { Timestamp } from 'firebase/firestore';
 import { Injectable } from '@angular/core';
+import {
+  Firestore,
+  DocumentSnapshot,
+  QueryConstraint,
+  DocumentData,
+  doc,
+  docData,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  collection,
+  collectionData,
+  query,
+  where,
+  limit,
+} from '@angular/fire/firestore';
+import * as cd from 'cd-interfaces';
 import * as dbPathUtils from './path.utils';
 import * as firestore from '@angular/fire/firestore';
-import * as cd from 'cd-interfaces';
+
+const ONE_BILLION = 1000000000;
 
 /**
  * Handles the most common database operations for the app. This service is
@@ -42,11 +45,11 @@ export class DatabaseService {
   public batchQueue = new BatchQueue();
   private _disconnectProject$ = new Subject<void>();
 
-  static getTimestamp(): firebase.firestore.Timestamp {
-    return firebase.firestore.Timestamp.now();
+  static getTimestamp(): Timestamp {
+    return Timestamp.now();
   }
 
-  constructor(private _afs: firestore.AngularFirestore) {
+  constructor(private _afs: Firestore) {
     fromEvent<BeforeUnloadEvent>(window, 'beforeunload')
       .pipe(filter(() => this.batchQueue.active))
       .subscribe(this.handleBeforeUnload);
@@ -61,72 +64,77 @@ export class DatabaseService {
     e.returnValue = '';
   };
 
-  setDocument(path: string, payload: cd.CdDatabaseDocument) {
-    return this._afs.doc(path).set(payload);
+  async setDocument(path: string, payload: cd.CdDatabaseDocument) {
+    return await addDoc(collection(this._afs, path), payload);
   }
 
-  updateDocument(path: string, payload: Partial<cd.CdDatabaseDocument>) {
-    return this._afs.doc(path).update(payload);
+  async updateDocument(path: string, payload: Partial<cd.CdDatabaseDocument>) {
+    return await updateDoc(doc(this._afs, path), payload);
   }
 
-  deleteDocument(path: string): Promise<void> {
-    return this._afs.doc(path).delete();
+  async deleteDocument(path: string): Promise<void> {
+    return await deleteDoc(doc(this._afs, path));
   }
 
-  getDocument(path: string): Observable<firebase.firestore.DocumentSnapshot<unknown>> {
-    return this._afs.doc(path).get().pipe(retry(RETRY_ATTEMPTS), first());
+  getDocument(path: string): Observable<DocumentSnapshot<unknown>> {
+    return from(getDoc(doc(this._afs, path))).pipe(retry(RETRY_ATTEMPTS), first());
   }
 
   getDocumentData<T>(path: string): Observable<T | undefined> {
     return this.getDocument(path).pipe(map((doc) => doc.data() as T));
   }
 
-  getCollection<T>(
-    collection: FirebaseCollectionType,
-    queryFn?: firestore.QueryFn
-  ): Observable<T[]> {
-    return this._afs
-      .collection(collection, queryFn)
-      .snapshotChanges()
-      .pipe(
+  getCollection(
+    collectionName: FirebaseCollectionType,
+    queryExpressions?: QueryConstraint[]
+  ): Observable<DocumentData[]> {
+    if (queryExpressions) {
+      const collectionRef = collection(this._afs, collectionName);
+
+      return collectionData(query(collectionRef, ...queryExpressions)).pipe(
         retry(RETRY_ATTEMPTS),
-        first(), // Auto unsubscribe
-        map((actions) => actions.map((a) => a.payload.doc.data() as T))
+        first(),
+        map((actions) => actions.map((a) => a.payload.doc.data() as DocumentData))
       );
+    }
+
+    return collectionData(collection(this._afs, collectionName)).pipe(
+      retry(RETRY_ATTEMPTS),
+      first(),
+      map((actions) => actions.map((a) => a.payload.doc.data() as DocumentData))
+    );
   }
 
   getProjectContents(projectId: string): Observable<cd.IProjectContentDocument[]> {
-    return this._afs
-      .collection(FirebaseCollection.ProjectContents, (ref) =>
-        ref.where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, projectId)
+    return collectionData(
+      query(
+        collection(this._afs, FirebaseCollection.ProjectContents),
+        where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, projectId)
       )
-      .get()
-      .pipe(
-        retry(RETRY_ATTEMPTS),
-        first(), // Auto unsubscribe
-        map((snapshot) => snapshot.docs.map((doc) => doc.data() as cd.IProjectContentDocument))
-      );
+    ).pipe(
+      retry(RETRY_ATTEMPTS),
+      first(), // Auto unsubscribe
+      map((data) => data.map((doc) => doc.data() as cd.IProjectContentDocument))
+    );
   }
 
-  getProjectBoards = (project: cd.IProject, limit?: number): Observable<cd.IBoardProperties[]> => {
-    const projectContentsRef = this._afs.collection(FirebaseCollection.ProjectContents).ref;
-    const boardsQuery = projectContentsRef
-      .where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, project.id)
-      .where(
-        FirebaseField.ElementType,
-        FirebaseQueryOperation.Equals,
-        cd.ElementEntitySubType.Board
-      );
-    const queryWithLimit = limit ? boardsQuery.limit(limit) : boardsQuery;
-    const snapshot$ = from(queryWithLimit.get());
-    const boards$ = snapshot$.pipe(
-      map((snapshot) => {
-        return snapshot.docs.map((d) => d.data() as cd.IBoardProperties);
-      }),
-      take(1)
+  getProjectBoards = (project: cd.IProject, max?: number): Observable<DocumentData[]> => {
+    return collectionData(
+      query(
+        collection(this._afs, FirebaseCollection.ProjectContents),
+        where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, project.id),
+        where(
+          FirebaseField.ElementType,
+          FirebaseQueryOperation.Equals,
+          cd.ElementEntitySubType.Board
+        ),
+        limit(max ?? ONE_BILLION) // Ridiculoudly high number if no max is passed
+      )
+    ).pipe(
+      retry(RETRY_ATTEMPTS),
+      first(), // Auto unsubscribe
+      map((data) => data.map((doc) => doc.data() as cd.IBoardProperties))
     );
-
-    return boards$;
   };
 
   writeProjectAndContents = (project: cd.IProject, contents: cd.IProjectContentDocument[]) => {
@@ -145,21 +153,27 @@ export class DatabaseService {
     return writeProject$.pipe(switchMap(() => this.batchChanges(contentBatch)));
   };
 
-  subscribeToProjectComments(
-    projectId: string
-  ): Observable<firestore.DocumentChangeAction<unknown>[]> {
-    const projectComments$ = this._afs
-      .collection(FirebaseCollection.Comments, (ref) =>
-        ref.where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, projectId)
+  subscribeToProjectComments(projectId: string): Observable<DocumentData[]> {
+    return collectionData(
+      query(
+        collection(this._afs, FirebaseCollection.Comments),
+        where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, projectId)
       )
-      .stateChanges()
-      .pipe(takeUntil(this._disconnectProject$));
+    ).pipe(takeUntil(this._disconnectProject$));
 
-    return projectComments$;
+    // OLD: (state changes?)
+    // const projectComments$ = this._afs
+    //   .collection(FirebaseCollection.Comments, (ref) =>
+    //     ref.where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, projectId)
+    //   )
+    //   .stateChanges()
+    //   .pipe(takeUntil(this._disconnectProject$));
+
+    // return projectComments$;
   }
 
-  subscribeToDocument<T>(path: string): Observable<T | undefined> {
-    return this._afs.doc<T>(path).valueChanges();
+  subscribeToDocument(path: string): Observable<DocumentData | undefined> {
+    return docData(doc(this._afs, path));
   }
 
   unsubscribeProject() {
@@ -170,7 +184,7 @@ export class DatabaseService {
    * @param writes Map from path to document to payload to be written to that document
    * @param deletes Set of strings that each represent the path to a document. E.g. project_contents/id
    */
-  batchChanges(writes?: cd.WriteBatchPayload, deletes?: Set<string>): Promise<void> {
+  async batchChanges(writes?: cd.WriteBatchPayload, deletes?: Set<string>): Promise<void> {
     const batchChunker = new BatchChunker(this._afs);
     this.batchQueue.add(batchChunker.id);
 
@@ -205,15 +219,15 @@ export class DatabaseService {
       .finally(() => this.batchQueue.remove(batchChunker.id));
   }
 
-  writeAnalyticsEvent = (exceptionEntry: cd.IExceptionEvent) => {
+  writeAnalyticsEvent = async (exceptionEntry: cd.IExceptionEvent) => {
     const entryPath = dbPathUtils.exceptionsPathForId(exceptionEntry.id);
-    return this.setDocument(entryPath, exceptionEntry);
+    return await this.setDocument(entryPath, exceptionEntry);
   };
 
   checkIfAdminUser = (user: cd.IUser): Observable<boolean> => {
-    const path = dbPathUtils.adminsPathForId(user.id);
-    const adminDocRef = this._afs.doc(path);
-    return adminDocRef.get().pipe(map((snapshot) => snapshot.exists));
+    return docData(doc(this._afs, dbPathUtils.adminsPathForId(user.id))).pipe(
+      map((data) => !!data.id)
+    );
   };
 
   /**
@@ -229,5 +243,5 @@ export class DatabaseService {
     console.warn(`Batch Write: Undefined in ${id} - ${JSON.stringify(payload)}`);
   }
 
-  private _getDocRef = (path: string) => this._afs.doc<cd.CdDatabaseDocument>(path).ref;
+  private _getDocRef = (path: string) => doc(this._afs, path);
 }
