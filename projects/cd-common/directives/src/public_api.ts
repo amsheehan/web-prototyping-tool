@@ -23,3 +23,4 @@ export * from './directive.module';
 export * from './hidden.directive';
 export * from './style.directive';
 export * from './text-inject.directive';
+export * from './update-tag.directive';

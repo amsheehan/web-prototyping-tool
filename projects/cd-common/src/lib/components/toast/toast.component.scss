@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 $minHeight: 42px;
 $duration: 0.16s;
@@ -94,13 +94,14 @@ $duration: 0.16s;
 }
 
 .message {
+  @include font.cd-font-overflow-ellipsis;
+
   cursor: auto;
   user-select: none;
   font-size: var(--cd-font-size-default);
   font-family: var(--cd-body-font);
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
-  @include cd-font-overflow-ellipsis;
 }
 
 .actions {

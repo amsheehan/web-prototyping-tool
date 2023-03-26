@@ -411,7 +411,7 @@ export const executeJSAction = (
   try {
     const func = new win.Function('target', 'self', 'document', 'window', action.value);
     func(target, self, outletDocument, win);
-  } catch (err) {
+  } catch (err: any) {
     sendRunJSErrorToast(err);
   }
 };

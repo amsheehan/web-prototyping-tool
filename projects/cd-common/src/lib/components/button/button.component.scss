@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 $transitionSpeed: 250ms;
 
@@ -43,6 +43,8 @@ $transitionSpeed: 250ms;
 }
 
 :host {
+  @include font.cd-font-overflow-ellipsis;
+
   text-decoration: none;
   font-family: var(--cd-header-font);
   font-weight: 500;
@@ -62,7 +64,6 @@ $transitionSpeed: 250ms;
   border: none;
   user-select: none;
   color: var(--cd-font-color);
-  @include cd-font-overflow-ellipsis;
 
   &.ready {
     transition: border $transitionSpeed, background-color $transitionSpeed,

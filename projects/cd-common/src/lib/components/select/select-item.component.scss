@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 $size: 26px;
 $imagePadding: 6;
@@ -107,8 +107,9 @@ $imagePadding: 6;
 
 .title,
 .subtitle {
+  @include font.cd-font-overflow-ellipsis;
+
   display: block;
-  @include cd-font-overflow-ellipsis;
 }
 
 .left {

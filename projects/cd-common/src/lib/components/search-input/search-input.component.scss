@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@use 'sass-utils/components/button/button';
+@use 'components/button/index' as button;
 
 .clear {
   @include button.button-reset;

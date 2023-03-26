@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+@use '../mixins' as *;
+
 @mixin sliderOverrides() {
   .mat-slider-vertical {
     min-width: 50px;

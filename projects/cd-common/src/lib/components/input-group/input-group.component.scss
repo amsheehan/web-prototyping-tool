@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/components/button/_mixins.scss';
+@use 'components/button' as button;
 
 :host {
   display: grid;
@@ -94,7 +94,7 @@
 }
 
 .rich-tooltip-label {
-  @include button-reset();
+  @include button.button-reset();
 
   pointer-events: all;
   color: inherit;

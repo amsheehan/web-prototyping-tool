@@ -16,6 +16,8 @@
 
 /* stylelint-disable selector-type-no-unknown */
 
+@use '../mixins' as *;
+
 @mixin switchOverrides() {
   $toggleBarMargin: 8px;
   $hintMarginLabelAfter: 0.25em 0.5em 0 0;

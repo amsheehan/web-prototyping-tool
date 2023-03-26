@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-@use 'sass-utils/cssvars' as *;
-@use 'sass-utils/scroll/scroll';
+@use 'cssvars' as css-vars;
+@use 'scroll' as scroll;
 
 $maxHeight: 220px;
 $totalPadding: 12px;
 
 :host {
-  outline: none;
   @include scroll.themed-scrollbars();
+
+  outline: none;
 }
 
 .list {
@@ -30,20 +31,20 @@ $totalPadding: 12px;
   overflow-y: auto;
   overflow-y: overlay;
   margin: 0;
-  padding: cssvar(spacing-1) 0;
+  padding: css-vars.inline-css-var(spacing-1) 0;
   max-height: $maxHeight;
   width: -webkit-fill-available;
   min-width: max-content;
 }
 
 .wrapper {
-  animation: cd-reveal 70ms #{cssvar(transition-timing)};
-  border-radius: cssvar(border-radius-2);
+  animation: cd-reveal 70ms #{css-vars.inline-css-var(transition-timing)};
+  border-radius: css-vars.inline-css-var(border-radius-2);
   contain: content;
   overflow: hidden;
   display: grid;
-  background: cssvar(modal-background-color);
-  box-shadow: cssvar(depth-6);
+  background: css-vars.inline-css-var(modal-background-color);
+  box-shadow: css-vars.inline-css-var(depth-6);
   position: absolute;
 }
 
@@ -51,14 +52,14 @@ $totalPadding: 12px;
   position: relative;
   display: grid;
   grid-template-columns: auto 1fr auto;
-  height: cssvar(size-5);
+  height: css-vars.inline-css-var(size-5);
   overflow: hidden;
   width: 100%;
   align-items: center;
   box-sizing: border-box;
-  padding: 0 cssvar(spacing-1);
-  gap: cssvar(spacing-0);
-  border-bottom: 1px solid cssvar(border-color);
+  padding: 0 css-vars.inline-css-var(spacing-1);
+  gap: css-vars.inline-css-var(spacing-0);
+  border-bottom: 1px solid css-vars.inline-css-var(border-color);
 }
 
 .empty-state {
@@ -79,12 +80,12 @@ $totalPadding: 12px;
   .filter {
     grid-row-start: 2;
     border-bottom: none;
-    border-top: 1px solid cssvar(border-color);
+    border-top: 1px solid css-vars.inline-css-var(border-color);
   }
 
   .empty-state {
     grid-row-start: 1;
-    height: cssvar(size-5);
+    height: css-vars.inline-css-var(size-5);
     align-items: center;
   }
 

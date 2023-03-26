@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 .file-input-label {
   display: grid;
@@ -33,5 +33,5 @@ input[type='file'] {
 }
 
 .filename {
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font-overflow-ellipsis;
 }

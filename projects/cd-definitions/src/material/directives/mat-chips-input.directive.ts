@@ -24,7 +24,7 @@ import {
   ContentChild,
 } from '@angular/core';
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
-import { MatChip, MatChipInput, MatChipInputEvent, MatChipList } from '@angular/material/chips';
+import { MatChip, MatChipInput, MatChipInputEvent, MatChipListbox } from '@angular/material/chips';
 import { Subscription } from 'rxjs';
 
 export const CHIP_SEPARATOR_KEYS = [ENTER, COMMA];
@@ -61,10 +61,10 @@ export class MatInputChipsDirective implements AfterViewInit, OnDestroy {
 
   @ContentChild(MatChipInput, { read: MatChipInput }) _inputRef!: MatChipInput;
 
-  constructor(private _chipsList: MatChipList) {}
+  constructor(private _chipsList: MatChipListbox) {}
 
   get chipValues(): string[] {
-    return this._chipsList.chips.map((chip) => chip.value);
+    return this._chipsList._chips.map((chip) => chip.value);
   }
 
   ngAfterViewInit(): void {

@@ -55,7 +55,7 @@
             ],
             "styles": ["src/styles.scss"],
             "stylePreprocessorOptions": {
-              "includePaths": ["sass-utils"]
+              "includePaths": ["src/styles/sass-utils"]
             },
             "scripts": [],
             "webWorkerTsConfig": "tsconfig.worker.json",
@@ -299,7 +299,7 @@
             "webWorkerTsConfig": "tsconfig.worker.json",
             "assets": ["src/favicon.svg", "src/favicon.ico", "src/assets", "src/manifest.json"],
             "stylePreprocessorOptions": {
-              "includePaths": ["sass-utils"]
+              "includePaths": ["src/styles/sass-utils"]
             }
           }
         },
@@ -363,7 +363,7 @@
             "tsConfig": "projects/cd-common/tsconfig.spec.json",
             "karmaConfig": "projects/cd-common/karma.conf.js",
             "stylePreprocessorOptions": {
-              "includePaths": ["sass-utils"]
+              "includePaths": ["src/styles/sass-utils"]
             }
           }
         },
@@ -401,7 +401,7 @@
             "tsConfig": "projects/cd-utils/tsconfig.spec.json",
             "karmaConfig": "projects/cd-utils/karma.conf.js",
             "stylePreprocessorOptions": {
-              "includePaths": ["sass-utils"]
+              "includePaths": ["src/styles/sass-utils"]
             }
           }
         },
@@ -486,7 +486,11 @@
             ],
             "styles": [],
             "stylePreprocessorOptions": {
-              "includePaths": ["node_modules", "sass-utils", "src/assets/custom-elements"]
+              "includePaths": [
+                "node_modules",
+                "src/styles/sass-utils",
+                "src/assets/custom-elements"
+              ]
             },
             "scripts": [],
             "vendorChunk": true,
@@ -564,7 +568,11 @@
             "karmaConfig": "projects/renderer/karma.conf.js",
             "styles": [],
             "stylePreprocessorOptions": {
-              "includePaths": ["node_modules", "sass-utils", "src/assets/custom-elements"]
+              "includePaths": [
+                "node_modules",
+                "src/styles/sass-utils",
+                "src/assets/custom-elements"
+              ]
             },
             "assets": [
               "projects/renderer/src/favicon.svg",
@@ -663,7 +671,7 @@
             "assets": [],
             "styles": [],
             "stylePreprocessorOptions": {
-              "includePaths": []
+              "includePaths": ["src/styles/sass-utils"]
             },
             "scripts": [],
             "vendorChunk": true,
@@ -902,7 +910,7 @@
             "tsConfig": "projects/cd-definitions/tsconfig.spec.json",
             "karmaConfig": "projects/cd-definitions/karma.conf.js",
             "stylePreprocessorOptions": {
-              "includePaths": ["sass-utils"]
+              "includePaths": ["src/styles/sass-utils"]
             }
           }
         },
@@ -966,7 +974,7 @@
             ],
             "styles": ["projects/component-demos/src/styles.scss"],
             "stylePreprocessorOptions": {
-              "includePaths": ["sass-utils", "src/styles.scss"]
+              "includePaths": ["src/styles/sass-utils", "src/styles.scss"]
             },
             "scripts": [],
             "vendorChunk": true,

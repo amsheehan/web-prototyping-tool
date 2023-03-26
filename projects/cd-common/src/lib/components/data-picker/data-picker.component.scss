@@ -1,4 +1,4 @@
-@use 'sass-utils/font/font' as font;
+// @use 'sass-utils/font/font' as font;
 
 $collapsedWidth: 192px;
 $collapsedHeight: 128px;
@@ -94,9 +94,9 @@ $timing: 200ms;
     visibility: visible;
   }
 
-  span {
-    @include cd-font-overflow-ellipsis;
-  }
+  // span {
+  //   @include cd-font-overflow-ellipsis;
+  // }
 
   .label {
     display: grid;

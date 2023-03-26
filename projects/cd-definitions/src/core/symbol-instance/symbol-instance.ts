@@ -81,7 +81,7 @@ export class SymbolInstanceFactory
   assignPositionFromSymbol(symbol: cd.ISymbolProperties) {
     const styles = getElementBaseStyles(symbol);
     const position = extractPositionFromStyle(styles);
-    Object.assign(this.styles.base.style, position);
+    Object.assign(this.styles.base.style ?? {}, position);
     return this;
   }
 }

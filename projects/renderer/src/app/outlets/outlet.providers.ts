@@ -21,12 +21,12 @@ import { MAT_DATE_LOCALE, MATERIAL_SANITY_CHECKS } from '@angular/material/core'
 import { ErrorHandlerService } from '../services/error-handler.service';
 import { HighContrastModeDetector } from '@angular/cdk/a11y';
 import type { IRenderOutletApp } from 'cd-interfaces';
-import {
-  _MAT_INK_BAR_POSITIONER,
-  ɵangular_material_src_material_tabs_tabs_a as _MAT_INK_BAR_POSITIONER_FACTORY,
-  MAT_TABS_CONFIG,
-  MatTabsConfig,
-} from '@angular/material/tabs';
+// import {
+//   _MAT_INK_BAR_POSITIONER,
+//   ɵangular_material_src_material_tabs_tabs_a as _MAT_INK_BAR_POSITIONER_FACTORY,
+//   MAT_TABS_CONFIG,
+//   MatTabsConfig,
+// } from '@angular/material/tabs';
 
 @Injectable({ providedIn: 'root' })
 class HighContrastModeStub extends HighContrastModeDetector {
@@ -49,13 +49,13 @@ export default function (
     { provide: PLATFORM_ID, useValue: PLATFORM_BROWSER_ID },
     { provide: DOCUMENT, useValue: outletDocument },
     { provide: MAT_DATE_LOCALE, useValue: navigator.language },
-    { provide: _MAT_INK_BAR_POSITIONER, useFactory: _MAT_INK_BAR_POSITIONER_FACTORY },
+    // { provide: _MAT_INK_BAR_POSITIONER, useFactory: _MAT_INK_BAR_POSITIONER_FACTORY },
     { provide: MATERIAL_SANITY_CHECKS, useValue: false }, // disable material sanity checks
     { provide: ErrorHandler, useClass: ErrorHandlerService },
     { provide: HighContrastModeDetector, useClass: HighContrastModeStub },
-    {
-      provide: MAT_TABS_CONFIG,
-      useValue: { animationDuration: '0' } as MatTabsConfig,
-    },
+    // {
+    //   provide: MAT_TABS_CONFIG,
+    //   useValue: { animationDuration: '0' } as MatTabsConfig,
+    // },
   ];
 }

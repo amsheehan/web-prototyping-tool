@@ -28,7 +28,7 @@
   overflow: hidden;
 }
 
-@mixin cdInfoTextFont {
+@mixin cd-info-text-font {
   line-height: 1.5;
   font-size: var(--cd-font-size-default);
   color: var(--cd-font-color);

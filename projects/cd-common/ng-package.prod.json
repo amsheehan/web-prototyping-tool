@@ -3,6 +3,6 @@
   "dest": "../../dist/cd-common",
   "lib": {
     "entryFile": "src/public_api.ts",
-    "styleIncludePaths": ["../../theme"]
+    "styleIncludePaths": ["../../theme", "../../src/styles/sass-utils"]
   }
 }

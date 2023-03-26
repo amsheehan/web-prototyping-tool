@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 :host {
   display: grid;
@@ -30,7 +30,7 @@
 }
 
 .label {
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font-overflow-ellipsis;
 
   user-select: text;
   height: var(--cd-size-3);

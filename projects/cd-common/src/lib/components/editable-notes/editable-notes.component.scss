@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font';
+@use 'font' as font;
 
 .notes-property-group {
   border-bottom: 1px solid var(--cd-border-color-light);
@@ -25,7 +25,7 @@
 }
 
 .notes-empty-state {
-  @include cdInfoTextFont;
+  @include font.cd-info-text-font;
 
   cursor: pointer;
   margin: var(--cd-spacing-1) var(--cd-spacing-3);

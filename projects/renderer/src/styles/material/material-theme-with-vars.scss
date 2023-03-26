@@ -15,7 +15,7 @@
  */
 
 /* stylelint-disable value-keyword-case */
-@import '~angular-material-css-vars/main';
+@use 'angular-material-css-vars/main' as *;
 
 // Note: Colors are often used in rgba function, so they all need to be an rgb value
 // example rgba(var(--palette-foreground-base), 0.1)

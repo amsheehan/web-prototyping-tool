@@ -15,6 +15,9 @@
  */
 
 /* stylelint-disable selector-type-no-unknown */
+
+@use '../mixins' as *;
+
 .mat-tab-body-wrapper {
   flex: 1;
 }

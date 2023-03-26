@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 :host {
   display: grid;
@@ -27,7 +27,7 @@
 }
 
 .header-title {
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font-overflow-ellipsis;
 
   font-size: var(--cd-font-size-h2);
   font-family: var(--cd-header-font);

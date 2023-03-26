@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-@use 'sass-utils/cssvars' as *;
-@use 'sass-utils/scroll/scroll';
+// @use 'sass-utils/cssvars' as vars;
+// @use 'sass-utils/scroll/scroll' as scroll;
 
 $cellHeight: 22px;
 
@@ -30,7 +30,7 @@ $cellHeight: 22px;
   box-sizing: border-box;
   user-select: none;
 
-  @include scroll.themed-scrollbars();
+  // @include scroll.themed-scrollbars();
 
   &.show-filter {
     grid-template-rows: auto 1fr;

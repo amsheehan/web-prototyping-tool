@@ -16,6 +16,8 @@
 
 // stylelint-disable selector-type-no-unknown
 
+@use '../mixins' as *;
+
 // This mixin ensures CSS variables and padding are assigned properly
 // And make it easier to update in the future
 @mixin buttonOverrides(
@@ -236,4 +238,3 @@ mat-menu.ng-star-inserted {
 
 // DEFAULT OVERRIDES
 @include buttonOverrides(16px, 36px, 32px, 0 12px, 24px, 8px);
-

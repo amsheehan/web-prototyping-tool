@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/scroll/scroll.scss';
+@use 'scroll' as scroll;
 
 :host {
+  @include scroll.themed-scrollbars();
+
   display: grid;
   grid-auto-flow: row;
   gap: var(--cd-spacing-0);
-
-  @include themed-scrollbars();
 }
 
 .label {

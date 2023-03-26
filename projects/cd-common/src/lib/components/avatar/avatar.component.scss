@@ -14,26 +14,26 @@
  * limitations under the License.
  */
 
-@use 'sass-utils/cssvars' as *;
+@use 'cssvars' as css-vars;
 
 :host {
   outline: none;
   contain: layout;
-  width: cssvar(size-5);
-  height: cssvar(size-5);
+  width: css-vars.inline-css-var(size-5);
+  height: css-vars.inline-css-var(size-5);
 }
 
 .avatar {
   display: block;
-  width: cssvar(size-5);
-  height: cssvar(size-5);
+  width: css-vars.inline-css-var(size-5);
+  height: css-vars.inline-css-var(size-5);
   border: none;
   padding: 0;
   margin: 0;
   overflow: hidden;
   outline: none;
-  border-radius: cssvar(size-5);
-  background-color: cssvar(background-color);
+  border-radius: css-vars.inline-css-var(size-5);
+  background-color: css-vars.inline-css-var(background-color);
   transition: box-shadow 120ms ease-out;
   cursor: pointer;
   position: relative;
@@ -43,12 +43,12 @@
     display: block;
     object-fit: cover;
     object-position: center;
-    width: cssvar(size-5);
-    height: cssvar(size-5);
+    width: css-vars.inline-css-var(size-5);
+    height: css-vars.inline-css-var(size-5);
     border-radius: 50%;
   }
 }
 
 .select {
-  box-shadow: 0 0 0 2px cssvar(primary-color);
+  box-shadow: 0 0 0 2px css-vars.inline-css-var(primary-color);
 }

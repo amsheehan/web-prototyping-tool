@@ -16,6 +16,8 @@
 
 // stylelint-disable selector-type-no-unknown
 
+@use '../mixins' as *;
+
 @mixin formFieldOverrides() {
   .mat-form-field {
     --matco-suffix-icon-size: 24px;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 :host.symbol {
   --cd-font-color: var(--cd-symbol-color);
@@ -100,7 +100,7 @@
 }
 
 .label {
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font-overflow-ellipsis;
 
   outline: none;
   color: var(--cd-font-color);

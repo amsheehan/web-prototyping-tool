@@ -16,6 +16,8 @@
 
 // stylelint-disable selector-type-no-unknown
 
+@use '../mixins' as *;
+
 $buttonPadding: 0 12px;
 $smallPadding: 0 8px;
 $buttonLineHeight: 36px;
@@ -172,4 +174,3 @@ $iconWithTextSize: $iconSmallSize;
     );
   }
 }
-

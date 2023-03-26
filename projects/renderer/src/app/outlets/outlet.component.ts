@@ -15,7 +15,8 @@
  */
 
 // prettier-ignore
-import { Input, OnChanges, SimpleChanges, OnInit, HostBinding, Optional, Inject, OnDestroy, ɵmarkDirty as markDirty, Directive, ComponentFactoryResolver, ViewContainerRef, ApplicationRef, ComponentRef, } from '@angular/core';
+// import { Input, OnChanges, SimpleChanges, OnInit, HostBinding, Optional, Inject, OnDestroy, emarkForCheck as markDirty, Directive, ComponentFactoryResolver, ViewContainerRef, ApplicationRef, ComponentRef, } from '@angular/core';
+import { Input, OnChanges, SimpleChanges, OnInit, HostBinding, Optional, Inject, OnDestroy, Directive, ComponentFactoryResolver, ViewContainerRef, ApplicationRef, ComponentRef, ChangeDetectorRef } from '@angular/core';
 import { IMAGE_FALLBACK_URL_EXPORT_MODE, IMAGE_FALLBACK_URL } from 'cd-common/consts';
 import { SnackbarComponent } from '../outlet-components/snackbar/snackbar.component';
 import { rootIdsUpdated$ } from '../utils/renderer.utils';
@@ -42,6 +43,7 @@ class SnackbarManagerDirective implements OnDestroy {
   constructor(
     protected _resolver: ComponentFactoryResolver,
     protected _viewRef: ViewContainerRef,
+    protected _changeDetectorRef: ChangeDetectorRef,
     @Optional() @Inject(DOCUMENT) protected doc?: Document
   ) {}
 
@@ -223,7 +225,7 @@ export class OutletComponentDirective
   }
 
   markForChangeDetection() {
-    markDirty(this);
+    this._changeDetectorRef.markForCheck();
   }
 
   ngOnDestroy(): void {

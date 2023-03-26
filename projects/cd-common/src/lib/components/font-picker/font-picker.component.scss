@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 $searchHeaderHeight: 36px;
 
@@ -67,7 +67,7 @@ $searchHeaderHeight: 36px;
   font-size: 1rem;
   color: var(--cd-font-color);
   text-align: left;
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font-overflow-ellipsis;
 
   &:hover {
     background-color: var(--cd-menu-hover);
@@ -121,7 +121,7 @@ $searchHeaderHeight: 36px;
   flex: 1;
   font-family: var(--cd-header-font);
   font-size: 1.5rem;
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font-overflow-ellipsis;
 }
 
 .preview {

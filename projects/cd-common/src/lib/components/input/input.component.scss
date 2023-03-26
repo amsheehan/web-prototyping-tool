@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
+
 $transitionSpeed: 120ms;
 
 .select-input-arrow {
@@ -34,6 +35,8 @@ $transitionSpeed: 120ms;
 }
 
 .input {
+  @include font.cd-font-overflow-ellipsis;
+
   background: transparent;
   border: none;
   color: inherit;
@@ -41,16 +44,11 @@ $transitionSpeed: 120ms;
   width: auto;
   outline: none;
   padding: 0 var(--cd-spacing-1);
-  @include cd-font-overflow-ellipsis;
 
   &::placeholder {
     color: inherit;
     opacity: 0.6;
   }
-
-  // &.step-visible {
-  //   text-overflow: initial;
-  // }
 
   &::-webkit-outer-spin-button,
   &::-webkit-inner-spin-button {
@@ -210,6 +208,8 @@ input[type='number'] {
 }
 
 .bottom-label {
+  @include font.cd-font-overflow-ellipsis;
+
   grid-row-start: 2;
   grid-column-start: 1;
   grid-column-end: 3;
@@ -221,7 +221,6 @@ input[type='number'] {
   text-decoration: none;
   text-transform: uppercase;
   transition: opacity 150ms;
-  @include cd-font-overflow-ellipsis;
 }
 
 :host.focused,

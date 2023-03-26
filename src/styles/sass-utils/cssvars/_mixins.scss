@@ -1,0 +1,8 @@
+// generates :root { --cd-name:value; }
+@mixin root-css-var($location, $vars) {
+  #{$location} {
+    @each $name, $value in $vars {
+      --cd-#{$name}: #{$value};
+    }
+  }
+}

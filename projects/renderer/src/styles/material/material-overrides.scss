@@ -15,20 +15,21 @@
  */
 
 /* stylelint-disable selector-type-no-unknown */
-@import './material-theme-with-vars.scss';
-@import './mat-button-overrides.scss';
-@import './mat-button-toggle-overrides.scss';
-@import './mat-switch-overrides.scss';
-@import './mat-menu-overrides.scss';
-@import './mat-stepper-overrides.scss';
-@import './mat-tabs-overrides.scss';
-@import './mat-form-overrides.scss';
-@import './mat-chip-overrides.scss';
-@import './mat-expansion-panel-overrides.scss';
-@import './mat-checkbox-overrides.scss';
-@import './mat-radiobutton-overrides.scss';
-@import './mat-slider-overrides.scss';
-@import './mat-progress-spinner-overrides.scss';
+@use './material-theme-with-vars.scss' as *;
+@use './mat-button-overrides.scss' as *;
+@use './mat-button-toggle-overrides.scss' as *;
+@use './mat-switch-overrides.scss' as *;
+@use './mat-menu-overrides.scss' as *;
+@use './mat-stepper-overrides.scss' as *;
+@use './mat-tabs-overrides.scss' as *;
+@use './mat-form-overrides.scss' as *;
+@use './mat-chip-overrides.scss' as *;
+@use './mat-expansion-panel-overrides.scss' as *;
+@use './mat-checkbox-overrides.scss' as *;
+@use './mat-radiobutton-overrides.scss' as *;
+@use './mat-slider-overrides.scss' as *;
+@use './mat-progress-spinner-overrides.scss' as *;
+@use '../mixins' as *;
 
 .material-icons {
   font-family: var(--co-icon-font-family, 'Google Material Icons');

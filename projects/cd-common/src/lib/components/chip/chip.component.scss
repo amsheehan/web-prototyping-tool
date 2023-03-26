@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
-@import 'sass-utils/components/chip/chip.scss';
+@use 'font' as font;
+@use 'components' as components;
 
 .close-btn {
   position: relative;
@@ -54,7 +54,7 @@
 }
 
 :host {
-  @include chip-base;
+  @include components.chip-base;
 
   line-height: initial;
   background-color: var(--cd-sidebar-color);
@@ -95,7 +95,7 @@
 }
 
 .title {
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font-overflow-ellipsis;
 
   font-family: var(--cd-header-font);
   font-weight: 500;

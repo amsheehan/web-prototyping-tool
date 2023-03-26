@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 .count {
   font-family: var(--cd-mono-font);
@@ -82,7 +82,7 @@
 }
 
 h2 {
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font-overflow-ellipsis;
 
   color: var(--cd-font-color);
   z-index: 1;

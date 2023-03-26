@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 $transitionSpeed: 185ms;
 
@@ -76,13 +76,13 @@ header {
 }
 
 .title {
-  @include cd-font(overline);
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font(overline);
+  @include font.cd-font-overflow-ellipsis;
 }
 
 :host.sub-header {
   .title {
-    @include cd-font(body1);
+    @include font.cd-font(body1);
 
     color: var(--cd-font-color);
     text-transform: capitalize;

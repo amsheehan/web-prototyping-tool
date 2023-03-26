@@ -1,180 +1,182 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// /*
+//  * Copyright 2021 Google LLC
+//  *
+//  * Licensed under the Apache License, Version 2.0 (the "License");
+//  * you may not use this file except in compliance with the License.
+//  * You may obtain a copy of the License at
+//  *
+//  *     https://www.apache.org/licenses/LICENSE-2.0
+//  *
+//  * Unless required by applicable law or agreed to in writing, software
+//  * distributed under the License is distributed on an "AS IS" BASIS,
+//  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//  * See the License for the specific language governing permissions and
+//  * limitations under the License.
+//  */
 
-// stylelint-disable selector-type-no-unknown
-@import './mixins.scss';
-@import './material/material-overrides.scss';
-@import './preview-styles.scss';
-@import './board-portal.scss';
-@import './tooltips.scss';
-@import './input-primitive.scss';
+// // stylelint-disable selector-type-no-unknown
+// @use './mixins' as *;
+// @use './material/material-overrides.scss' as *;
+// @use './preview-styles.scss' as *;
+// @use './board-portal.scss' as *;
+// @use './tooltips.scss' as *;
+// @use './input-primitive.scss' as *;
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  font-family: 'Roboto', sans-serif;
-  -webkit-font-smoothing: subpixel-antialiased;
-}
+// @forward 'mixins';
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+// html,
+// body {
+//   margin: 0;
+//   padding: 0;
+//   width: 100%;
+//   height: 100%;
+//   overflow: hidden;
+//   font-family: 'Roboto', sans-serif;
+//   -webkit-font-smoothing: subpixel-antialiased;
+// }
 
-:host {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
+// *,
+// *::before,
+// *::after {
+//   box-sizing: border-box;
+// }
 
-body {
-  @include applyFontVars('body1');
-}
+// :host {
+//   display: block;
+//   width: 100%;
+//   height: 100%;
+// }
 
-h1 {
-  @include applyFontVars('headline1');
-}
+// body {
+//   @include applyFontVars('body1');
+// }
 
-h2 {
-  @include applyFontVars('headline2');
-}
+// h1 {
+//   @include applyFontVars('headline1');
+// }
 
-h3 {
-  @include applyFontVars('headline3');
-}
+// h2 {
+//   @include applyFontVars('headline2');
+// }
 
-h4 {
-  @include applyFontVars('headline4');
-}
+// h3 {
+//   @include applyFontVars('headline3');
+// }
 
-h5 {
-  @include applyFontVars('headline5');
-}
+// h4 {
+//   @include applyFontVars('headline4');
+// }
 
-h6 {
-  @include applyFontVars('headline6');
-}
+// h5 {
+//   @include applyFontVars('headline5');
+// }
 
-a {
-  color: var(--co-primary);
-  text-decoration: none;
+// h6 {
+//   @include applyFontVars('headline6');
+// }
 
-  &:hover {
-    text-decoration: underline;
-  }
-}
+// a {
+//   color: var(--co-primary);
+//   text-decoration: none;
 
-// Fix for cursor on the material icons font
-i {
-  user-select: none;
-}
+//   &:hover {
+//     text-decoration: underline;
+//   }
+// }
 
-iframe {
-  border: none;
-}
+// // Fix for cursor on the material icons font
+// i {
+//   user-select: none;
+// }
 
-.cd-fit-content {
-  width: fit-content;
-  height: fit-content;
-}
+// iframe {
+//   border: none;
+// }
 
-.cd-generic-div {
-  overflow: initial;
-  height: initial;
-}
+// .cd-fit-content {
+//   width: fit-content;
+//   height: fit-content;
+// }
 
-cd-outlet {
-  display: contents;
-}
+// .cd-generic-div {
+//   overflow: initial;
+//   height: initial;
+// }
 
-// These styles default the root of a board and portal to be width/height 100%
-// For boards this is so that they fill the entire iframe
-// For portals this is so they expand to fill the entire tab/step/panel etc
-.outlet-root > .inner-root,
-.cd-portal-wrapper > .inner-root {
-  width: 100%;
-  height: 100%;
-}
+// cd-outlet {
+//   display: contents;
+// }
 
-// Amount of padding in the component preview of the code component editor
-$codeCompPadding: 24px;
+// // These styles default the root of a board and portal to be width/height 100%
+// // For boards this is so that they fill the entire iframe
+// // For portals this is so they expand to fill the entire tab/step/panel etc
+// .outlet-root > .inner-root,
+// .cd-portal-wrapper > .inner-root {
+//   width: 100%;
+//   height: 100%;
+// }
 
-// This class is added the body of the Code component outlet iframe
-// to center the injected custom element
-.center-code-component {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: $codeCompPadding;
+// // Amount of padding in the component preview of the code component editor
+// $codeCompPadding: 24px;
 
-  > * {
-    width: 100%;
-    height: 100%;
-  }
+// // This class is added the body of the Code component outlet iframe
+// // to center the injected custom element
+// .center-code-component {
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   padding: $codeCompPadding;
 
-  &::after {
-    content: '';
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    pointer-events: none;
-    transition: border-color 200ms ease;
-    border: $codeCompPadding solid rgba(0, 0, 0, 0.1);
-    position: absolute;
-    z-index: -1;
-  }
+//   > * {
+//     width: 100%;
+//     height: 100%;
+//   }
 
-  &:hover::after {
-    border: $codeCompPadding solid rgba(0, 0, 0, 0);
-  }
-}
+//   &::after {
+//     content: '';
+//     top: 0;
+//     bottom: 0;
+//     left: 0;
+//     right: 0;
+//     pointer-events: none;
+//     transition: border-color 200ms ease;
+//     border: $codeCompPadding solid rgba(0, 0, 0, 0.1);
+//     position: absolute;
+//     z-index: -1;
+//   }
 
-.center-code-component.cd-preview-mode-active::after {
-  content: none;
-}
+//   &:hover::after {
+//     border: $codeCompPadding solid rgba(0, 0, 0, 0);
+//   }
+// }
 
-// DO NOT REMOVE
-// This is used inside mat button to conditionally add a mat-menu
-.co-mat-menu-trigger {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  /// Do not change to transparent, hit targets may not work
-  background: rgba(0, 0, 0, 0);
-}
+// .center-code-component.cd-preview-mode-active::after {
+//   content: none;
+// }
 
-// Utility class for setting display: contents
-.cd-display-contents {
-  display: contents;
-}
+// // DO NOT REMOVE
+// // This is used inside mat button to conditionally add a mat-menu
+// .co-mat-menu-trigger {
+//   position: absolute;
+//   top: 0;
+//   left: 0;
+//   right: 0;
+//   bottom: 0;
+//   /// Do not change to transparent, hit targets may not work
+//   background: rgba(0, 0, 0, 0);
+// }
 
-// Action Hint Canvas Styles
-// see renderer/src/app/interactions
-.co-hint-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 999999;
-  pointer-events: none;
-}
+// // Utility class for setting display: contents
+// .cd-display-contents {
+//   display: contents;
+// }
+
+// // Action Hint Canvas Styles
+// // see renderer/src/app/interactions
+// .co-hint-canvas {
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   z-index: 999999;
+//   pointer-events: none;
+// }

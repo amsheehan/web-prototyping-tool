@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-@use 'sass-utils/font/font';
-@use 'sass-utils/cssvars' as *;
+@use 'font' as font;
+@use 'cssvars' as css-vars;
 
 $ace-size-icon-small: 18px;
 $ace-size-icon-medium: 24px;
@@ -28,9 +28,9 @@ $icon-size: 36px;
   grid-template-rows: 1fr;
   position: absolute;
   overflow: hidden;
-  background: cssvar(modal-background-color);
-  border-radius: cssvar(border-radius-3);
-  box-shadow: cssvar(depth-6);
+  background: css-vars.inline-css-var(modal-background-color);
+  border-radius: css-vars.inline-css-var(border-radius-3);
+  box-shadow: css-vars.inline-css-var(depth-6);
   top: 0;
   left: 0;
   width: 220px;
@@ -48,21 +48,21 @@ $icon-size: 36px;
 .scroll-header {
   display: grid;
   grid-auto-flow: column;
-  gap: cssvar(spacing-2);
-  padding: cssvar(spacing-2);
+  gap: css-vars.inline-css-var(spacing-2);
+  padding: css-vars.inline-css-var(spacing-2);
 }
 
 .filter {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  height: cssvar(size-4);
+  height: css-vars.inline-css-var(size-4);
   align-items: center;
-  gap: cssvar(spacing-2);
-  padding-left: cssvar(spacing-2);
-  padding-right: cssvar(spacing-1);
-  border-radius: cssvar(border-radius-5);
+  gap: css-vars.inline-css-var(spacing-2);
+  padding-left: css-vars.inline-css-var(spacing-2);
+  padding-right: css-vars.inline-css-var(spacing-1);
+  border-radius: css-vars.inline-css-var(border-radius-5);
   overflow: hidden;
-  background: cssvar(input-background-color);
+  background: css-vars.inline-css-var(input-background-color);
 }
 
 .filter-ico {
@@ -73,16 +73,16 @@ $icon-size: 36px;
   display: grid;
   grid-auto-flow: column;
   align-items: center;
-  gap: cssvar(spacing-0);
+  gap: css-vars.inline-css-var(spacing-0);
 
   button {
     border: none;
     background: none;
-    color: cssvar(font-color);
-    border-radius: cssvar(border-radius-4);
+    color: css-vars.inline-css-var(font-color);
+    border-radius: css-vars.inline-css-var(border-radius-4);
     cursor: pointer;
-    width: cssvar(size-1);
-    height: cssvar(size-1);
+    width: css-vars.inline-css-var(size-1);
+    height: css-vars.inline-css-var(size-1);
     display: grid;
     justify-content: center;
     align-items: center;
@@ -92,17 +92,17 @@ $icon-size: 36px;
   }
 
   button:hover {
-    background: cssvar(focus-fill);
+    background: css-vars.inline-css-var(focus-fill);
   }
 
   button.selected {
-    background: cssvar(primary-color);
-    color: cssvar(inverted-font-color);
+    background: css-vars.inline-css-var(primary-color);
+    color: css-vars.inline-css-var(inverted-font-color);
   }
 
   button.disabled {
     pointer-events: none;
-    opacity: cssvar(disabled-opacity);
+    opacity: css-vars.inline-css-var(disabled-opacity);
   }
 }
 
@@ -113,7 +113,7 @@ $icon-size: 36px;
   margin: 0;
   flex-direction: column;
   flex: 1;
-  padding: 0 0 #{cssvar(spacing-2)} #{cssvar(spacing-2)};
+  padding: 0 0 #{css-vars.inline-css-var(spacing-2)} #{css-vars.inline-css-var(spacing-2)};
   width: 184px;
 }
 
@@ -121,25 +121,26 @@ $icon-size: 36px;
   display: grid;
   grid-template-columns: 1fr auto;
   align-items: center;
-  height: cssvar(size-5);
-  padding: 0 #{cssvar(spacing-2)};
-  border-top: 1px solid #{cssvar(border-color)};
+  height: css-vars.inline-css-var(size-5);
+  padding: 0 #{css-vars.inline-css-var(spacing-2)};
+  border-top: 1px solid #{css-vars.inline-css-var(border-color)};
 }
 
 .selected {
   display: grid;
-  gap: cssvar(spacing-0);
+  gap: css-vars.inline-css-var(spacing-0);
   overflow: hidden;
   cursor: pointer;
 }
 
 .selected-id {
+  @include font.cd-font-overflow-ellipsis;
+
   display: block;
   font-size: 12px;
-  color: cssvar(primary-color);
-  font-family: cssvar(header-font);
+  color: css-vars.inline-css-var(primary-color);
+  font-family: css-vars.inline-css-var(header-font);
   font-weight: 500;
-  @include font.cd-font-overflow-ellipsis;
 }
 
 .category,
@@ -151,7 +152,7 @@ $icon-size: 36px;
 
 .category {
   display: grid;
-  grid-template-rows: cssvar(size-2) 1fr;
+  grid-template-rows: css-vars.inline-css-var(size-2) 1fr;
   align-items: center;
 }
 
@@ -162,14 +163,14 @@ $icon-size: 36px;
 .list {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: cssvar(spacing-1);
+  gap: css-vars.inline-css-var(spacing-1);
   justify-content: start;
 }
 
 .list-item {
   cursor: pointer;
   background-color: transparent;
-  border-radius: cssvar(border-radius-1);
+  border-radius: css-vars.inline-css-var(border-radius-1);
   width: $icon-size;
   height: $icon-size;
   display: flex;
@@ -181,8 +182,8 @@ $icon-size: 36px;
   transition: background-color 200ms, box-shadow 150ms;
 
   &:hover {
-    color: cssvar(primary-color);
-    background-color: cssvar(focus-fill);
+    color: css-vars.inline-css-var(primary-color);
+    background-color: css-vars.inline-css-var(focus-fill);
   }
 
   &:focus {
@@ -190,16 +191,16 @@ $icon-size: 36px;
   }
 
   &.active {
-    color: cssvar(primary-color);
-    box-shadow: inset 0 0 0 1.5px #{cssvar(primary-color)};
+    color: css-vars.inline-css-var(primary-color);
+    box-shadow: inset 0 0 0 1.5px #{css-vars.inline-css-var(primary-color)};
     background: transparent;
   }
 }
 
 .icon {
   user-select: none;
-  width: cssvar(size-3);
-  height: cssvar(size-3);
+  width: css-vars.inline-css-var(size-3);
+  height: css-vars.inline-css-var(size-3);
 }
 
 .svg-icon-small {
@@ -219,11 +220,11 @@ $icon-size: 36px;
 
 .footer-link {
   text-decoration: none;
-  color: cssvar(font-color);
+  color: css-vars.inline-css-var(font-color);
   transition: color 150ms;
   justify-self: end;
 
   &:hover {
-    color: cssvar(primary-color);
+    color: css-vars.inline-css-var(primary-color);
   }
 }

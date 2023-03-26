@@ -50,7 +50,7 @@ import { MaterialSwitch } from './material/switch/switch';
 import { MaterialSlider, MAT_SLIDER_VALUE } from './material/slider/slider';
 import { MaterialSpinner } from './material/spinner/spinner';
 import { MaterialSelect } from './material/select/select';
-import { MaterialTabs } from './material/tabs/tabs';
+// import { MaterialTabs } from './material/tabs/tabs';
 import { MaterialProgressBar, MAT_PROGRESS_BAR_VALUE } from './material/progress-bar/progress-bar';
 import { MaterialExpansionPanel } from './material/expansion-panel/expansion-panel';
 
@@ -91,7 +91,7 @@ export const registerComponentDefinitions = () => {
   registerComponent(ElementEntitySubType.Spinner)(MaterialSpinner);
   registerComponent(ElementEntitySubType.ProgressBar)(MaterialProgressBar);
   registerComponent(ElementEntitySubType.ChipList)(MaterialChips);
-  registerComponent(ElementEntitySubType.Tabs)(MaterialTabs);
+  // registerComponent(ElementEntitySubType.Tabs)(MaterialTabs);
   registerComponent(ElementEntitySubType.Stepper)(MaterialStepper);
   registerComponent(ElementEntitySubType.ExpansionPanel)(MaterialExpansionPanel);
   registerComponent(ElementEntitySubType.AutoNav)(AutoNav);
@@ -104,5 +104,8 @@ export { MatSelectFixModule } from './material/select/select-fix/mat-select-fix.
 export { DateFixModule } from './material/datepicker/date-fix/date-fix.module';
 
 export * from './material/material-shared';
+export * from './material/directives';
+export * from './material/select/select-fix/mat-select-fix.pipe';
+export * from './material/datepicker/date-fix/date-fix.pipe';
 
 export { DefsDirectivesModule } from './material/directives/directives.module';

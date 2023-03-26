@@ -17,14 +17,14 @@
 /* You can add global styles to this file, and also import other style files */
 @use 'sass-utils/cssvars' as *;
 
-@import '~normalize.css/normalize.css';
-@import './styles/themes/default';
-@import './styles/dnd-ghost';
-@import './styles/rich-text';
-@import './styles/tooltip';
-@import './styles/badge';
-@import './styles/keyframes';
-@import './styles/glass';
+@use 'normalize.css/normalize.css' as *;
+@use './styles/themes/default' as *;
+@use './styles/dnd-ghost' as *;
+@use './styles/rich-text' as *;
+@use './styles/tooltip' as *;
+@use './styles/badge' as *;
+@use './styles/keyframes' as *;
+@use './styles/glass' as *;
 
 h1,
 h2,

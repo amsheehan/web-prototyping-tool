@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 :host {
   display: contents;
@@ -42,6 +42,8 @@
 }
 
 .footer li {
+  @include font.cd-font-overflow-ellipsis;
+
   font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: 0.08929em;
@@ -51,5 +53,4 @@
   text-rendering: optimizeLegibility;
   text-transform: uppercase;
   transition: opacity 150ms;
-  @include cd-font-overflow-ellipsis;
 }

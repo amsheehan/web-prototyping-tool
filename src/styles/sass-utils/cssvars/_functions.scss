@@ -1,0 +1,8 @@
+$prefix: cd;
+// generates var(--cd-name);
+@function inline-css-var($name, $fallback: '') {
+  @if $fallback != '' {
+    @return var(--#{$prefix}-#{$name}, #{$fallback});
+  }
+  @return var(--#{$prefix}-#{$name});
+}

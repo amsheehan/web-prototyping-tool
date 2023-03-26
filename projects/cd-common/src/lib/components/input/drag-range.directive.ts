@@ -19,7 +19,7 @@ import { InputType } from 'cd-interfaces';
 import { fromEvent, merge, Subscription } from 'rxjs';
 import { distinctUntilChanged, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import { assignGlobalCursor } from 'cd-utils/css';
-import { InputComponent } from './input.component';
+// import { InputComponent } from './input.component';
 import { clamp } from 'cd-utils/numeric';
 
 /** This directive attaches east / west cursor resize to update an input.component's numeric value  */
@@ -41,10 +41,13 @@ export class DragRangeDirective implements OnDestroy {
 
   @HostBinding('class.drag-range')
   get enabled() {
-    return this._input.disabled === false && this._valid;
+    return this._elemRef.nativeElement.disabled === false && this._valid;
   }
 
-  constructor(private _elemRef: ElementRef, private _input: InputComponent) {}
+  // constructor(private _elemRef: ElementRef, private _input: InputComponent) {}
+  constructor(private _elemRef: ElementRef) {
+    console.log(_elemRef);
+  }
 
   get element() {
     return this._elemRef.nativeElement;
@@ -96,11 +99,11 @@ export class DragRangeDirective implements OnDestroy {
   }
 
   onPointerMove = (val: number) => {
-    const { value, min, max } = this._input;
+    const { value, min, max } = this._elemRef.nativeElement;
     const currentValue = Number(value);
     const pos = currentValue + val;
     const update = clamp(pos, min, max);
-    this._input.change.emit(update);
+    this._elemRef.nativeElement.change.emit(update);
   };
 
   cleanup() {
