@@ -1,30 +1,14 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import { Observable, fromEvent } from 'rxjs';
 import { offlineDiffWorker } from './index';
 import { map, filter, first } from 'rxjs/operators';
 import * as utils from '../../routes/project/utils/project.utils';
 import * as cd from 'cd-interfaces';
 import { deleteIdbData, getIdbData } from './indexed-db.utils';
-import firebase from 'firebase/app';
+import { Timestamp } from 'firebase/firestore';
 import { createContentSection } from 'cd-common/utils';
 
-const convertFirebaseTimestamp = (ts: firebase.firestore.Timestamp) => {
-  return new firebase.firestore.Timestamp(ts.seconds, ts.nanoseconds);
+const convertFirebaseTimestamp = (ts: Timestamp) => {
+  return new Timestamp(ts.seconds, ts.nanoseconds);
 };
 
 export const deleteLocalDataForProject = async (projectId: string) => {
@@ -67,10 +51,7 @@ export const getLocalDataForProject = async (
   };
 };
 
-export const isRemoteDataNewerThanLocalData = (
-  remote: firebase.firestore.Timestamp,
-  local?: firebase.firestore.Timestamp
-): boolean => {
+export const isRemoteDataNewerThanLocalData = (remote: Timestamp, local?: Timestamp): boolean => {
   return local ? remote.seconds > local.seconds : false;
 };
 

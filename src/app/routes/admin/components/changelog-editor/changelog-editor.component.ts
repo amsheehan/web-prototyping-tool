@@ -1,29 +1,13 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-import type * as cd from 'cd-interfaces';
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { AngularFirestoreCollection, AngularFirestore } from '@angular/fire/firestore';
-import { FirebaseCollection } from 'cd-common/consts';
 import dayjs from 'dayjs';
-import firebase from 'firebase/app';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Timestamp } from '@angular/fire/firestore';
+import { FirebaseCollection } from 'cd-common/consts';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { newsUpdatesPathForId } from 'src/app/database/path.utils';
 import { ToastsService } from '../../../../services/toasts/toasts.service';
+import { DatabaseService } from 'src/app/database/database.service';
+import { DocumentData } from 'firebase/firestore';
+import type * as cd from 'cd-interfaces';
 
 interface INewsDetail extends cd.INewsItem {
   id: string;
@@ -38,15 +22,15 @@ const TEMP_NEW_ELEMENT_ID = 'TEMP_NEW_ID';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ChangelogEditorComponent implements OnInit {
-  private _newsCollection?: AngularFirestoreCollection<cd.INewsItem>;
+  private _newsCollection?: any;
   public activeDetails = 'description';
   public activeTitle = 'title';
   public activeDay = 24;
   public activeMonth = 2;
   public activeYear = 2020;
-  public activeDate?: firebase.firestore.Timestamp;
+  public activeDate?: Timestamp;
   public activeId = '';
-  public newsFeed?: Observable<INewsDetail[]>;
+  public newsFeed?: Observable<DocumentData[]>;
 
   get isAddingNew() {
     return this.activeId === TEMP_NEW_ELEMENT_ID;
@@ -59,32 +43,19 @@ export class ChangelogEditorComponent implements OnInit {
   get fullEntry(): cd.INewsItem {
     return {
       title: this.activeTitle,
-      date: this.activeDate || firebase.firestore.Timestamp.now(),
+      date: this.activeDate || Timestamp.now(),
       details: this.activeDetails,
     };
   }
 
   constructor(
-    private _afs: AngularFirestore,
+    private _database: DatabaseService,
     private _cdRef: ChangeDetectorRef,
     private _toastService: ToastsService
   ) {}
 
   ngOnInit() {
-    this._newsCollection = this._afs.collection<cd.INewsItem>(
-      FirebaseCollection.NewsUpdates,
-      (ref) => ref.orderBy('date', 'desc')
-    );
-
-    this.newsFeed = this._newsCollection.snapshotChanges().pipe(
-      map((actions) =>
-        actions.map((a) => {
-          const data = a.payload.doc.data() as cd.INewsItem;
-          const id = a.payload.doc.id;
-          return { id, ...data };
-        })
-      )
-    );
+    this.newsFeed = this._database.getCollection(FirebaseCollection.NewsUpdates);
   }
 
   onDayChange(day: number) {
@@ -104,9 +75,7 @@ export class ChangelogEditorComponent implements OnInit {
 
   updateDate() {
     const { activeYear, activeMonth, activeDay } = this;
-    this.activeDate = firebase.firestore.Timestamp.fromDate(
-      new Date(activeYear, activeMonth, activeDay)
-    );
+    this.activeDate = Timestamp.fromDate(new Date(activeYear, activeMonth, activeDay));
     this._cdRef.markForCheck();
   }
 
@@ -120,7 +89,7 @@ export class ChangelogEditorComponent implements OnInit {
     this._cdRef.markForCheck();
   }
 
-  assignDateFromTimestamp(value: firebase.firestore.Timestamp) {
+  assignDateFromTimestamp(value: Timestamp) {
     const datetimeObj = dayjs(value.toMillis());
     this.activeMonth = datetimeObj.month();
     this.activeDay = datetimeObj.date();
@@ -144,7 +113,7 @@ export class ChangelogEditorComponent implements OnInit {
     this.activeId = TEMP_NEW_ELEMENT_ID;
     this.activeDetails = 'description';
     this.activeTitle = 'Alpha';
-    const datetime = firebase.firestore.Timestamp.now();
+    const datetime = Timestamp.now();
     this.assignDateFromTimestamp(datetime);
     this._cdRef.markForCheck();
   }
@@ -166,7 +135,8 @@ export class ChangelogEditorComponent implements OnInit {
   async deleteNews() {
     if (!this.activeId) return;
     const docPath = newsUpdatesPathForId(this.activeId);
-    await this._afs.doc(docPath).delete();
+
+    await this._database.deleteDocument(docPath);
     this.clearSelection();
     this._toastService.addToast({
       message: 'Successfully deleted changelog entry',
@@ -186,7 +156,8 @@ export class ChangelogEditorComponent implements OnInit {
       });
     } else {
       const docPath = newsUpdatesPathForId(this.activeId);
-      await this._afs.doc(docPath).set(this.fullEntry);
+
+      await this._database.setDocument(docPath, this.fullEntry);
 
       this._toastService.addToast({
         message: 'Successfully edited changelog entry',

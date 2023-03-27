@@ -27,6 +27,7 @@ import { IScreenshotTask } from './screenshots';
 import { ICodeComponentDocument } from './code-component';
 import { ProjectDataset } from './dataset';
 import type { Timestamp } from 'firebase/firestore';
+import type { INewsItem } from './news';
 
 export interface IBaseDocument {
   id: string;
@@ -61,6 +62,7 @@ export type CdDatabaseDocument =
   | IExceptionEvent
   | IScreenshotTask
   | ICodeComponentDocument
+  | INewsItem
   | ProjectDataset;
 
 export type WriteBatchPayload = Map<string, CdDatabaseDocument>;
