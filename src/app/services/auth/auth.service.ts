@@ -22,13 +22,23 @@ import { environment } from 'src/environments/environment';
 import { IGoPayload } from 'src/app/store/actions/router.action';
 import { getIsAdminUser } from 'src/app/store/selectors/user.selector';
 import { Observable, from, BehaviorSubject, Subscription, EMPTY } from 'rxjs';
-import { Injectable, OnDestroy } from '@angular/core';
-import { AngularFireAuth } from '@angular/fire/auth';
+import { Injectable, OnDestroy, inject } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { map, catchError, tap } from 'rxjs/operators';
-import firebase from 'firebase/app';
+// import firebase from 'firebase/app';
+import {
+  Auth,
+  User,
+  UserCredential,
+  user,
+  getAuth,
+  signInWithCredential,
+  signInWithCustomToken,
+  GoogleAuthProvider,
+} from '@angular/fire/auth';
+import { getApp } from '@angular/fire/app';
 
-const convertAFUserToIUser = (afUser: firebase.User | null): IUser | undefined => {
+const convertAFUserToIUser = (afUser: User | null): IUser | undefined => {
   if (!afUser) return undefined;
   const { uid: id, displayName: name, photoURL: photoUrl, email } = afUser;
   return { id, name, email, photoUrl, profileUrl: null };
@@ -38,13 +48,20 @@ const convertAFUserToIUser = (afUser: firebase.User | null): IUser | undefined =
   providedIn: 'root',
 })
 export class AuthService implements OnDestroy {
+  private _auth: Auth = inject(Auth);
   private _subscriptions = new Subscription();
   public redirectPayload?: IGoPayload;
   public isAdminUser$ = new BehaviorSubject<boolean>(false);
+  public user$ = user(this._auth);
+  public userSubscription: Subscription;
 
-  constructor(public afAuth: AngularFireAuth, private _store: Store<IAppState>) {
+  constructor(public afAuth: Auth, private _store: Store<IAppState>) {
+    this.userSubscription = this.user$.subscribe((aUser: User | null) => {
+      console.log('logged in user: ', aUser);
+    });
     const isAdminUser$ = this._store.pipe(select(getIsAdminUser));
     this._subscriptions.add(isAdminUser$.subscribe(this.isAdminUser$));
+    this._subscriptions.add(this.userSubscription);
   }
 
   get isAdminUser(): boolean {
@@ -56,11 +73,11 @@ export class AuthService implements OnDestroy {
   }
 
   getUser(): Observable<IUser | undefined> {
-    return this.afAuth.user.pipe(map(convertAFUserToIUser));
+    return this.user$.pipe(map(convertAFUserToIUser));
   }
 
   checkSignIn(): Observable<IUser | undefined> {
-    return this.afAuth.user.pipe(
+    return this.user$.pipe(
       map(convertAFUserToIUser),
       tap(this._processSignIn),
       // Prevent showing the toast that a user has missing permissions
@@ -73,16 +90,21 @@ export class AuthService implements OnDestroy {
   }
 
   signInToFirebase(token: string): Observable<IUser | undefined> {
-    const firebaseCredential = firebase.auth.GoogleAuthProvider.credential(token);
-    return from(this.afAuth.signInWithCredential(firebaseCredential)).pipe(
+    const app = getApp();
+    const auth = getAuth(app);
+    const firebaseCredential = GoogleAuthProvider.credential(token);
+
+    return from(signInWithCredential(auth, firebaseCredential)).pipe(
       map(({ user }) => convertAFUserToIUser(user)),
       tap(this._processSignIn)
     );
   }
 
   signInWithToken(token: string): Observable<IUser | undefined> {
-    return from(this.afAuth.signInWithCustomToken(token)).pipe(
-      map((credential: firebase.auth.UserCredential) => convertAFUserToIUser(credential.user)),
+    const app = getApp();
+    const auth = getAuth(app);
+    return from(signInWithCustomToken(auth, token)).pipe(
+      map((credential: UserCredential) => convertAFUserToIUser(credential.user)),
       tap(this._processSignIn)
     );
   }

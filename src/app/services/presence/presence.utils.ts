@@ -17,16 +17,15 @@
 import type { IUser, IUserPresence } from 'cd-interfaces';
 import { environment } from 'src/environments/environment';
 import { PRESENCE_EXIT_PATH } from 'cd-common/consts';
-import firebase from 'firebase/app';
-import 'firebase/firestore';
+import { Timestamp } from 'firebase/firestore';
 
 export const constructPresenceDoc = (
   user: IUser,
   projectId: string,
   sessionId: string
 ): IUserPresence => {
-  const creationTime = firebase.firestore.Timestamp.now();
-  const pollTime = firebase.firestore.Timestamp.now();
+  const creationTime = Timestamp.now();
+  const pollTime = Timestamp.now();
 
   return {
     user,
@@ -39,6 +38,6 @@ export const constructPresenceDoc = (
 
 export const constructPresenceExitUrl = (sessionId: string) => {
   const { presenceServiceUrl } = environment;
-  const msTimestamp = firebase.firestore.Timestamp.now().toMillis();
+  const msTimestamp = Timestamp.now().toMillis();
   return `${presenceServiceUrl}/${PRESENCE_EXIT_PATH}/${sessionId}/${msTimestamp}`;
 };

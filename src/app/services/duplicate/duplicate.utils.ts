@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-import * as cd from 'cd-interfaces';
-import * as consts from 'cd-common/consts';
+import { Timestamp } from 'firebase/firestore';
 import { isDefined } from 'cd-utils/object';
 import { isString } from 'cd-utils/string';
-import firebase from 'firebase/app';
 import { isElement, isImage } from 'cd-common/models';
 import { getDatasetIdsUsedByElements, isDatasetDoc } from 'cd-common/utils';
 import { getContainedSymbolIdsRecursive } from 'src/app/routes/project/utils/symbol.utils';
+import * as cd from 'cd-interfaces';
+import * as consts from 'cd-common/consts';
 
 const REGEX_ESCAPE_SPECIAL_CHARS = /[.*+?^${}()|[\]\\]/g;
 const SPECIAL_CHARS_REPLACEMENT = '\\$&'; // $& means the whole matched string
@@ -77,7 +77,7 @@ export const duplicateProjectDoc = (
   owner: cd.IUserIdentity
 ): cd.IProject => {
   const newDoc = replaceStringsInDocs([project], replacementMap)[0] as cd.IProject;
-  const now = firebase.firestore.Timestamp.now();
+  const now = Timestamp.now();
   newDoc.updatedAt = now;
   newDoc.createdAt = now;
   newDoc.owner = owner;

@@ -15,11 +15,11 @@
  */
 
 import { getLocalDataForProject } from 'src/app/database/workers/offline.utils';
-import firebase from 'firebase/app';
+import { Timestamp } from 'firebase/firestore';
 import * as cd from 'cd-interfaces';
 
-const convertFirebaseTimestamp = (ts: firebase.firestore.Timestamp) => {
-  return new firebase.firestore.Timestamp(ts.seconds, ts.nanoseconds);
+const convertFirebaseTimestamp = (ts: Timestamp) => {
+  return new Timestamp(ts.seconds, ts.nanoseconds);
 };
 
 export const getLocalProjectDataForId = (

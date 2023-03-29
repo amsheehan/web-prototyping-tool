@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
+import { Timestamp } from 'firebase/firestore';
 import { KEYS } from 'cd-utils/keycodes';
 import { IConfigAction } from '../interfaces/action.interface';
 import { environment } from 'src/environments/environment';
 import { BODY_TAG, FirebaseField } from 'cd-common/consts';
-import firebase from 'firebase/app';
 import * as cd from 'cd-interfaces';
 
 export const BOARD_TAG = 'APP-BOARD';
@@ -113,7 +113,7 @@ export const findDesignSystemInProjectContents = (
  * Therefore we need to convert the object back into a firebase timestamp
  */
 export const processSyncOperationTimestamps = (diffReponse: cd.IOfflineDiffResponse) => {
-  const timestamp = firebase.firestore.Timestamp.now();
+  const timestamp = Timestamp.now();
   const syncOperations = diffReponse.syncOperations.map((res) => {
     if (res.type !== cd.IOfflineSyncOperationType.Write) return res;
     if (res.document && FirebaseField.LastUpdatedAt in res.document) {
@@ -127,5 +127,5 @@ export const processSyncOperationTimestamps = (diffReponse: cd.IOfflineDiffRespo
 /** Checks to see if a project partial has a timestamp, if not add one */
 export const updateProjectTimestamp = (project: Partial<cd.IProject>): Partial<cd.IProject> => {
   // always update the timestamp
-  return { ...project, updatedAt: firebase.firestore.Timestamp.now() };
+  return { ...project, updatedAt: Timestamp.now() };
 };

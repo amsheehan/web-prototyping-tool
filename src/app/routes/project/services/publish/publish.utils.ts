@@ -15,7 +15,7 @@
  */
 
 import * as cd from 'cd-interfaces';
-import firebase from 'firebase/app';
+import { Timestamp } from 'firebase/firestore';
 import { generateKeywordsForPublishEntry } from 'cd-common/utils';
 import { deepCopy } from 'cd-utils/object';
 import { createId } from 'cd-utils/guid';
@@ -29,7 +29,7 @@ export const createPublishEntry = (
 ): cd.IPublishEntry => {
   const id = createId();
   const versions: cd.IPublishVersion[] = [];
-  const timestamp = firebase.firestore.Timestamp.now();
+  const timestamp = Timestamp.now();
   const publishEntry: cd.IPublishEntry = {
     id,
     type,
@@ -66,7 +66,7 @@ export const createVersionMetadata = (
   codeComponentId?: string
 ): cd.IPublishVersion => {
   const id = createId();
-  const createdAt = firebase.firestore.Timestamp.now();
+  const createdAt = Timestamp.now();
   const version: cd.IPublishVersion = { id, name, projectId, createdAt };
   if (symbolId) version.symbolId = symbolId;
   if (codeComponentId) version.codeComponentId = codeComponentId;

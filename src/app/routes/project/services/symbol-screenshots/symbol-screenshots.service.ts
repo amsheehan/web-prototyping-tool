@@ -20,7 +20,7 @@ import { ScreenshotService } from 'src/app/services/screenshot-lookup/screenshot
 import { ProjectContentService } from 'src/app/database/changes/project-content.service';
 import { distinctUntilChanged, tap, take, filter, map } from 'rxjs/operators';
 import * as cd from 'cd-interfaces';
-import firebase from 'firebase/app';
+import { Timestamp } from 'firebase/firestore';
 
 @Injectable({
   providedIn: 'root',
@@ -55,7 +55,7 @@ export class SymbolScreenshotsService implements OnDestroy {
       tap((ref) => {
         // update cache
         const screenshots = new Map(this.componentScreenshots$.value);
-        const timestamp = firebase.firestore.Timestamp.now();
+        const timestamp = Timestamp.now();
         const lookup = { ...ref, timestamp };
         screenshots.set(symbolId, lookup);
         this.componentScreenshots$.next(screenshots);

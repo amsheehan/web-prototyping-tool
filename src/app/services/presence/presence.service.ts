@@ -15,9 +15,8 @@
  */
 
 import type * as cd from 'cd-interfaces';
-import * as firestore from '@angular/fire/firestore';
 import { FirebaseCollection, FirebaseField, FirebaseQueryOperation } from 'cd-common/consts';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { createId } from 'cd-utils/guid';
 import { select, Store } from '@ngrx/store';
 import { IAppState } from 'src/app/store/reducers';
@@ -25,8 +24,17 @@ import { getUser } from 'src/app/store/selectors';
 import { BehaviorSubject, fromEvent, Subscription } from 'rxjs';
 import { presencePathForId } from 'src/app/database/path.utils';
 import { constructPresenceDoc, constructPresenceExitUrl } from './presence.utils';
-import firebase from 'firebase/app';
-import 'firebase/firestore';
+import {
+  Timestamp,
+  collection,
+  collectionData,
+  doc,
+  query,
+  where,
+  setDoc,
+  Firestore,
+  deleteDoc,
+} from '@angular/fire/firestore';
 
 const PRESENCE_POLL_TIME = 20000;
 
@@ -41,12 +49,13 @@ export class PresenceService {
   private _user?: cd.IUserIdentity;
   private _pollInterval?: number;
   private _currentProjectId?: string;
+  private afs: Firestore = inject(Firestore);
 
   public currentPresence$ = new BehaviorSubject<cd.IUserPresence | undefined>(undefined);
   public otherPresentUsers$ = new BehaviorSubject<cd.IUserPresence[]>([]);
   public otherPresentUsersMap$ = new BehaviorSubject<Map<string, cd.IUserPresence>>(new Map());
 
-  constructor(private store: Store<IAppState>, private afs: firestore.AngularFirestore) {
+  constructor(private store: Store<IAppState>) {
     const user$ = this.store.pipe(select(getUser));
     this._subscriptions.add(user$.subscribe(this.onUserSubscription));
 
@@ -65,22 +74,35 @@ export class PresenceService {
     const presenceDocPath = presencePathForId(sessionId);
     const presence = constructPresenceDoc(_user, projectId, sessionId);
     this.currentPresence$.next(presence);
-    this.afs.firestore.doc(presenceDocPath).set(presence);
+
+    setDoc(doc(this.afs, presenceDocPath), presence);
 
     // Setup poll interval to update pollTime in presence doc
     const { setInterval, clearInterval } = window;
     if (this._pollInterval !== undefined) clearInterval(this._pollInterval);
     this._pollInterval = setInterval(() => this.updatePollTime(), PRESENCE_POLL_TIME);
 
+    // OLD
+    // const othersPresent$ = this.afs
+    //   .collection<cd.IUserPresence>(FirebaseCollection.UserPresence, (ref) =>
+    //     ref
+    //       .where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, projectId)
+    //       .where(FirebaseField.SessionId, FirebaseQueryOperation.NotEqualTo, this.sessionId)
+    //   )
+    //   .valueChanges();
+
     // query to see what other users are present in this project
-    const othersPresent$ = this.afs
-      .collection<cd.IUserPresence>(FirebaseCollection.UserPresence, (ref) =>
-        ref
-          .where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, projectId)
-          .where(FirebaseField.SessionId, FirebaseQueryOperation.NotEqualTo, this.sessionId)
+    const othersPresent$ = collectionData(
+      query(
+        collection(this.afs, FirebaseCollection.UserPresence),
+        where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, projectId),
+        where(FirebaseField.SessionId, FirebaseQueryOperation.NotEqualTo, this.sessionId)
       )
-      .valueChanges();
-    this._querySubscription = othersPresent$.subscribe(this.onOthersPresent);
+    );
+
+    // TODO: figure this out.
+    // this._querySubscription = othersPresent$.subscribe(this.onOthersPresent);
+    this._querySubscription = othersPresent$.subscribe(() => {});
   }
 
   removePresence() {
@@ -92,7 +114,8 @@ export class PresenceService {
 
     const { sessionId } = this;
     const presenceDocPath = presencePathForId(sessionId);
-    return this.afs.firestore.doc(presenceDocPath).delete();
+
+    return deleteDoc(doc(this.afs, presenceDocPath));
   }
 
   private onOthersPresent = (othersPresent: cd.IUserPresence[]) => {
@@ -109,9 +132,10 @@ export class PresenceService {
   private updatePollTime = () => {
     const currentPresence = this.currentPresence$.getValue();
     if (!currentPresence) return;
-    const pollTime = firebase.firestore.Timestamp.now();
+    const pollTime = Timestamp.now();
     const presenceDocPath = presencePathForId(this.sessionId);
-    this.afs.firestore.doc(presenceDocPath).set({ ...currentPresence, pollTime });
+
+    setDoc(doc(this.afs, presenceDocPath), { ...currentPresence, pollTime });
   };
 
   private onVisibilityChange = () => {
