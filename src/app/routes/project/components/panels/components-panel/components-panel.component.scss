@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-@use 'sass-utils/font/font';
-@use 'sass-utils/cssvars' as *;
+@use 'font' as font;
+@use 'cssvars' as *;
 
 :host {
   height: 100%;

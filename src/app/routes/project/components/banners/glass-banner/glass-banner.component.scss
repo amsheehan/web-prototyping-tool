@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import '../banner';
+@use '../banner';
 
 :host.show {
   background: var(--cd-red-color);

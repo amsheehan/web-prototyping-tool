@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@use 'sass-utils/font/font';
+@use 'font' as font;
 
 $headerFooterHeight: 50px;
 $transition: 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;

@@ -15,7 +15,7 @@
  */
 
 /* stylelint-disable selector-type-no-unknown */
-@import '../mixins.scss';
+@use '../mixins.scss';
 
 @mixin chipOverrides() {
   .mat-chip {

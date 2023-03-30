@@ -1,22 +1,16 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import * as cd from 'cd-interfaces';
-import * as firestore from '@angular/fire/firestore';
-import { Injectable, NgZone } from '@angular/core';
+import {
+  addDoc,
+  DocumentChange,
+  Firestore,
+  doc,
+  docData,
+  collection,
+  collectionData,
+  query,
+  where,
+} from '@angular/fire/firestore';
+import { Injectable, NgZone, inject } from '@angular/core';
 import { Observable, of, Subject, Subscription, asyncScheduler } from 'rxjs';
 import { projectContentsPathForId, projectPathForId } from '../path.utils';
 import { FirebaseCollection, FirebaseField, FirebaseQueryOperation } from 'cd-common/consts';
@@ -76,11 +70,11 @@ export class ProjectChangeCoordinator {
   private _remoteDatabaseWriteRequest$ = new Subject<cd.IChangeRequest>();
   private _localDatabaseWriteRequest$ = new Subject<cd.IProjectContent>();
   private _receivedContentFromRemote = false;
+  private firestore: Firestore = inject(Firestore);
 
   public undoRedoChangeProcessed$ = new Subject<cd.ElementContent>();
 
   constructor(
-    private afs: firestore.AngularFirestore,
     private store: Store<IAppState>,
     private zone: NgZone,
     private projectContentService: ProjectContentService,
@@ -208,16 +202,17 @@ export class ProjectChangeCoordinator {
     this._receivedContentFromRemote = false;
 
     const projectPath = projectPathForId(projectId);
-    const project$ = this.afs.doc<cd.IProject>(projectPath).valueChanges();
-    const projectContent$ = this.afs
-      .collection<cd.IProjectContentDocument>(FirebaseCollection.ProjectContents, (ref) =>
-        ref.where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, projectId)
+    const project$ = docData(doc(this.firestore, projectPath));
+    const projectContent$ = collectionData(
+      query(
+        collection(this.firestore, FirebaseCollection.ProjectContents),
+        where(FirebaseField.ProjectId, FirebaseQueryOperation.Equals, projectId)
       )
-      .stateChanges();
+    );
 
-    this._querySubscriptions.add(project$.subscribe(this.handleProjectChangeFromDatabase));
+    this._querySubscriptions.add(project$.subscribe(this.handleProjectChangeFromDatabase as any));
     this._querySubscriptions.add(
-      projectContent$.subscribe(this.handleProjectContentChangeFromDatabase)
+      projectContent$.subscribe(this.handleProjectContentChangeFromDatabase as any)
     );
 
     return project$.pipe(
@@ -292,7 +287,7 @@ export class ProjectChangeCoordinator {
 
   /** Handle incoming changes from Firestore subscription to project contents collection */
   private handleProjectContentChangeFromDatabase = (
-    changes: firestore.DocumentChangeAction<cd.IProjectContentDocument>[]
+    changes: DocumentChange<cd.IProjectContentDocument>[]
   ) => {
     const deletions = this._receivedContentFromRemote ? this.calcDeletionChanges(changes) : [];
     this._receivedContentFromRemote = true;
@@ -391,21 +386,25 @@ export class ProjectChangeCoordinator {
   /**
    * Write the change request to the change_request collection in Firestore to be processed
    */
-  private writeChangeRequestsToRemoteQueue = (changeRequests: cd.IChangeRequest[]) => {
+  private writeChangeRequestsToRemoteQueue = async (changeRequests: cd.IChangeRequest[]) => {
+    console.log({ changeRequests });
     for (const changeRequest of changeRequests) {
       const { payload, ...changeRequestDocContents } = changeRequest;
-      const batch = new BatchChunker(this.afs);
-      const changeRequestsCollection = this.afs.collection(FirebaseCollection.ChangeRequests);
-      const changeRequestDoc = changeRequestsCollection.doc<cd.IChangeRequest>();
+      const batch = new BatchChunker();
+      const changeRequestsCollection = collection(
+        this.firestore,
+        FirebaseCollection.ChangeRequests
+      );
+      const changeRequestDoc = await addDoc<cd.IChangeRequest>(changeRequestsCollection, {});
 
       // set contents of change request doc
       batch.set(changeRequestDoc.ref, changeRequestDocContents);
 
       // add each payload item to subcollection so that we can scale to any size payload
-      const payloadSubCollection = changeRequestDoc.collection(FirebaseField.Payload);
+      const payloadSubCollection = collection(changeRequestDoc, FirebaseField.Payload);
 
       for (const payloadItem of payload) {
-        const payloadDoc = payloadSubCollection.doc();
+        const payloadDoc = docData(doc(payloadSubCollection));
         const { sets, updates, deletes, ...payloadDocContents } = payloadItem;
 
         // set contents of payload doc

@@ -1,41 +1,36 @@
-/*
- * Copyright 2021 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     https://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 import { map, first, take, takeUntil, retry, switchMap } from 'rxjs/operators';
 import { Subscription, BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { ScreenshotService } from 'src/app/services/screenshot-lookup/screenshot-lookup.service';
-import * as firestore from '@angular/fire/firestore';
 import * as cd from 'cd-interfaces';
-import { OnDestroy, Injectable } from '@angular/core';
+import { OnDestroy, Injectable, inject } from '@angular/core';
 import { stringMatchesRegex } from 'cd-utils/string';
-import type firebase from 'firebase/app';
 import {
   DEFAULT_PROJECT_TYPE,
   FirebaseField,
-  FirebaseOrderBy,
   FirebaseQueryOperation,
   TILE_THUMBNAIL_LIMIT,
   UNICODE_RANGE_MAX,
+  FirebaseOrderBy,
 } from 'cd-common/consts';
 import { DatabaseService } from './database.service';
+import {
+  startAfter,
+  orderBy,
+  where,
+  Query,
+  CollectionReference,
+  collectionData,
+  collection,
+  query,
+  QueryConstraint,
+  QueryDocumentSnapshot,
+  Firestore,
+} from '@angular/fire/firestore';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 const OWNER_REGEX = /^owner:/;
 
-export type FirestoreDocSnapshot = firebase.firestore.QueryDocumentSnapshot<unknown>;
+export type FirestoreDocSnapshot = QueryDocumentSnapshot<unknown>;
 
 export interface IQueryResult<T extends cd.IBaseDocument> {
   data: T;
@@ -54,6 +49,7 @@ export class QueryService implements OnDestroy {
 
   private _loading = false;
   private _loading$ = new Subject<boolean>();
+  protected firestore = inject(Firestore);
   protected readonly destroyed = new ReplaySubject<void>(1);
   protected _latestEntry?: FirestoreDocSnapshot;
   protected _subscriptions = new Subscription();
@@ -64,37 +60,53 @@ export class QueryService implements OnDestroy {
 
   constructor(
     protected _screenshotService: ScreenshotService,
-    protected _afs: firestore.AngularFirestore,
     protected _databaseService: DatabaseService
   ) {}
 
   getCollection<T extends cd.IBaseDocument>(
     ref: string,
-    queryFn?: firestore.QueryFn
+    queryExpressions?: QueryConstraint[]
   ): Observable<IQueryResult<T>[]> {
-    return (
-      this._afs
-        .collection(ref, queryFn)
-        // Fix for cached results from firebase b/154047381
-        // .snapshotChanges()
-        .get({ source: 'server' })
-        .pipe(
-          retry(3),
-          first(), // Auto unsubscribe
-          map((results) =>
-            results.docs.reduce<IQueryResult<T>[]>((acc, doc) => {
-              const id = doc.id;
-              const data = doc.data() as T;
-              if (!id) {
-                console.error('Missing id for document', id);
-                return acc;
-              }
-              acc.push({ data, doc });
+    console.log('query.service.ts ln 59', { ref });
+    const collectionRef = collection(this.firestore, ref);
+
+    if (queryExpressions) {
+      return collectionData(query(collectionRef, ...queryExpressions)).pipe(
+        retry(3),
+        first(), // Auto unsubscribe
+        map((results) =>
+          results.reduce<IQueryResult<T>[]>((acc, doc) => {
+            console.log('query.service.ts ln 75: ', doc, acc);
+            const id = doc.id;
+            const data = doc.data() as T;
+            if (!id) {
+              console.error('Missing id for document', id);
               return acc;
-            }, [])
-          ),
-          takeUntil(this.destroyed)
-        )
+            }
+            acc.push({ data, doc });
+            return acc;
+          }, [])
+        ),
+        takeUntil(this.destroyed)
+      );
+    }
+
+    return collectionData(collection(this.firestore, ref)).pipe(
+      retry(3),
+      first(), // Auto unsubscribe
+      map((results) =>
+        results.reduce<IQueryResult<T>[]>((acc, doc) => {
+          const id = doc.id;
+          const data = doc.data() as T;
+          if (!id) {
+            console.error('Missing id for document', id);
+            return acc;
+          }
+          acc.push({ data, doc });
+          return acc;
+        }, [])
+      ),
+      takeUntil(this.destroyed)
     );
   }
 
@@ -143,25 +155,32 @@ export class QueryService implements OnDestroy {
   }
 
   buildUsernameSearchQuery(
-    ref: firestore.CollectionReference,
-    query: string,
-    lastEntry?: firebase.firestore.QueryDocumentSnapshot<unknown>,
+    ref: CollectionReference,
+    queryStr: string,
+    lastEntry?: QueryDocumentSnapshot<unknown>,
     types: cd.IProject['type'][] = [DEFAULT_PROJECT_TYPE]
-  ): firestore.Query {
-    let reference = ref
-      .where(FirebaseField.OwnerEmail, FirebaseQueryOperation.GreaterThanOrEqualTo, query)
-      .where(
+  ): Query {
+    console.log('query.service.ts ln 170');
+
+    const lastEntryFn = [];
+
+    if (lastEntry) {
+      lastEntryFn.push(startAfter(lastEntry));
+    }
+
+    return query(
+      ref,
+      where(FirebaseField.OwnerEmail, FirebaseQueryOperation.GreaterThanOrEqualTo, queryStr),
+      where(
         FirebaseField.OwnerEmail,
         FirebaseQueryOperation.LessThanOrEqualTo,
-        query + UNICODE_RANGE_MAX
-      )
-      .where(FirebaseField.DocumentType, FirebaseQueryOperation.In, types)
-      .orderBy(FirebaseField.OwnerEmail, FirebaseOrderBy.Asc)
-      .orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc);
-
-    if (lastEntry) reference = reference.startAfter(lastEntry);
-
-    return reference.limit(QueryService.BATCH_SIZE);
+        queryStr + UNICODE_RANGE_MAX
+      ),
+      where(FirebaseField.DocumentType, FirebaseQueryOperation.In, types),
+      orderBy(FirebaseField.OwnerEmail, FirebaseOrderBy.Asc),
+      orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc),
+      ...lastEntryFn
+    );
   }
 
   usernameFromQuery = (query: string): string | undefined => {

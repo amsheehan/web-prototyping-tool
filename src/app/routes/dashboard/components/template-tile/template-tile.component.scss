@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 $headerHeight: 170px;
 
@@ -68,7 +68,7 @@ $headerHeight: 170px;
 }
 
 .title {
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font-overflow-ellipsis;
 
   cursor: pointer;
   font-weight: 500;

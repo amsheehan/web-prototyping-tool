@@ -14,27 +14,31 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CanActivate, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Store, select } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
-import { AngularFireAuth } from '@angular/fire/auth';
+// import { AngularFireAuth } from '@angular/fire/auth';
 import * as appStore from '../../store';
 import { GUEST_USER } from '../../configs/guest-user.config';
 import { AuthService } from '../../services/auth/auth.service';
 import { AUTH_TOKEN_QUERY_PARAM, EMBED_MODE_QUERY_PARAM } from 'src/app/configs/routes.config';
 import { coerceBooleanProperty } from '@angular/cdk/coercion';
+import { Auth } from '@angular/fire/auth';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthGuard implements CanActivate {
+  private _afAuth: Auth = inject(Auth);
   constructor(
-    public afAuth: AngularFireAuth,
+    public afAuth: Auth,
     private authService: AuthService,
     private store: Store<appStore.IAppState>
-  ) {}
+  ) {
+    this.afAuth = this._afAuth;
+  }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean> {
     return this.checkUser(route, state);

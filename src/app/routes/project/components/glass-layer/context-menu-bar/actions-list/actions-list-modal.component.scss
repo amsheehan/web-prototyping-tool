@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
-@import '../shared.scss';
+@use 'font' as font;
+@use '../shared.scss' as *;
 
 :host {
   display: flex;
@@ -41,8 +41,8 @@
   font-size: var(--cd-font-size-default);
   padding-left: 2px;
 
-  @include cd-font(overline);
-  @include cd-font-overflow-ellipsis;
+  @include font.cd-font(overline);
+  @include font.cd-font-overflow-ellipsis;
 }
 
 .list {

@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-@use 'sass-utils/cssvars' as *;
-@use 'sass-utils/font/font';
+@use 'cssvars' as *;
+@use 'font' as font;
 
 $large-avatar-size: 96px;
 

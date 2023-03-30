@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'sass-utils/font/font.scss';
+@use 'font' as font;
 
 :host {
   z-index: 2;
@@ -44,13 +44,13 @@
   display: block;
 
   .title {
-    @include cd-font(headline2);
+    @include font.cd-font(headline2);
 
     color: var(--cd-header-font-color);
   }
 
   .subtitle {
-    @include cd-font(body2);
+    @include font.cd-font(body2);
 
     display: block;
     margin-bottom: var(--cd-spacing-5);

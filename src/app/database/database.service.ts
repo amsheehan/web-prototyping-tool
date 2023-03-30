@@ -30,7 +30,6 @@ import {
 } from '@angular/fire/firestore';
 import * as cd from 'cd-interfaces';
 import * as dbPathUtils from './path.utils';
-import * as firestore from '@angular/fire/firestore';
 
 const ONE_BILLION = 1000000000;
 
@@ -88,9 +87,9 @@ export class DatabaseService {
     collectionName: FirebaseCollectionType,
     queryExpressions?: QueryConstraint[]
   ): Observable<DocumentData[]> {
-    if (queryExpressions) {
-      const collectionRef = collection(this._afs, collectionName);
+    const collectionRef = collection(this._afs, collectionName);
 
+    if (queryExpressions) {
       return collectionData(query(collectionRef, ...queryExpressions)).pipe(
         retry(RETRY_ATTEMPTS),
         first(),
@@ -98,7 +97,7 @@ export class DatabaseService {
       );
     }
 
-    return collectionData(collection(this._afs, collectionName)).pipe(
+    return collectionData(collectionRef).pipe(
       retry(RETRY_ATTEMPTS),
       first(),
       map((actions) => actions.map((a) => a.payload.doc.data() as DocumentData))
@@ -185,7 +184,7 @@ export class DatabaseService {
    * @param deletes Set of strings that each represent the path to a document. E.g. project_contents/id
    */
   async batchChanges(writes?: cd.WriteBatchPayload, deletes?: Set<string>): Promise<void> {
-    const batchChunker = new BatchChunker(this._afs);
+    const batchChunker = new BatchChunker();
     this.batchQueue.add(batchChunker.id);
 
     if (writes) {

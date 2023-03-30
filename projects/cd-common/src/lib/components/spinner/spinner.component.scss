@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-@import 'spinner.mixin';
+@use './spinner.mixin.scss' as spinner;
 
 :host {
   display: block;
@@ -36,6 +36,6 @@
   }
 }
 
-@include generate-size(':host.small', 'small', 10);
-@include generate-size(':host.large', 'large', 32);
-@include generate-size(':host', 'med', 24);
+@include spinner.generate-size(':host.small', 'small', 10);
+@include spinner.generate-size(':host.large', 'large', 32);
+@include spinner.generate-size(':host', 'med', 24);
