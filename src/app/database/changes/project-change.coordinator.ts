@@ -80,7 +80,8 @@ export class ProjectChangeCoordinator {
     private projectContentService: ProjectContentService,
     private undoRedoService: UndoRedoService,
     private presenceService: PresenceService,
-    private rtcService: RtcService
+    private rtcService: RtcService,
+    private _afs: Firestore
   ) {
     const user$ = this.store.pipe(select(getUser));
     this._userSubscription.add(user$.subscribe(this.onUserSubscription));
@@ -387,18 +388,14 @@ export class ProjectChangeCoordinator {
    * Write the change request to the change_request collection in Firestore to be processed
    */
   private writeChangeRequestsToRemoteQueue = async (changeRequests: cd.IChangeRequest[]) => {
-    console.log({ changeRequests });
     for (const changeRequest of changeRequests) {
       const { payload, ...changeRequestDocContents } = changeRequest;
       const batch = new BatchChunker();
-      const changeRequestsCollection = collection(
-        this.firestore,
-        FirebaseCollection.ChangeRequests
-      );
-      const changeRequestDoc = await addDoc<cd.IChangeRequest>(changeRequestsCollection, {});
+      const changeRequestsCollection = collection(this._afs, FirebaseCollection.ChangeRequests);
+      const changeRequestDoc = await addDoc(changeRequestsCollection, {});
 
       // set contents of change request doc
-      batch.set(changeRequestDoc.ref, changeRequestDocContents);
+      batch.set(changeRequestDoc, changeRequestDocContents);
 
       // add each payload item to subcollection so that we can scale to any size payload
       const payloadSubCollection = collection(changeRequestDoc, FirebaseField.Payload);

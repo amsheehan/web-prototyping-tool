@@ -16,8 +16,8 @@
 }
 
 .title {
-  @include fonts.cd-font(overline);
-  @include fonts.cd-font-overflow-ellipsis;
+  @include font.cd-font(overline);
+  @include font.cd-font-overflow-ellipsis;
 }
 
 .cards-wrapper {

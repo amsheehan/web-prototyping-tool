@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-@use 'cssvars' as *;
+@use 'cssvars' as cssvars;
 @use 'light';
 @use 'dark';
 
 // themes are imported and generated here
 
-@include cssvar(':root', light.$theme);
-@include cssvar('.dark-theme', dark.$theme);
+@include cssvars.cssvar(':root', light.$theme);
+@include cssvars.cssvar('.dark-theme', dark.$theme);
