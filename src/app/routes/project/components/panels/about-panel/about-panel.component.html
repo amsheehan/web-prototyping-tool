@@ -6,7 +6,7 @@
     <span>{{ item.title }}</span>
   </button>
 </div>
-<ng-container *ngIf="newsFeed | async as feed">
+<ng-container *ngIf="newsFeed$ | async as feed">
   <cd-scroll-view *ngIf="feed.length">
     <h4 class="news-title" cdScrollHeader>News</h4>
     <section>

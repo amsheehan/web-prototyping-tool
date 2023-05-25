@@ -14,8 +14,14 @@
  * limitations under the License.
  */
 
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
-import { AngularFirestoreCollection, AngularFirestore } from '@angular/fire/firestore';
+import {
+  inject,
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
+import { Firestore, collection, onSnapshot } from '@angular/fire/firestore';
 import { Observable, Subscription } from 'rxjs';
 import { IStatusMessage } from '../../../project/interfaces/status-banner.interface';
 import { ToastsService } from '../../../../services/toasts/toasts.service';
@@ -35,7 +41,8 @@ interface IStatusMessageDetail extends IStatusMessage {
 })
 export class BannerEditorComponent implements OnInit {
   private _subscriptions = new Subscription();
-  private _statusMessageCollection?: AngularFirestoreCollection<IStatusMessage>;
+  private _statusMessageCollection? = [];
+  private firestore = inject(Firestore);
   public activeStatusID = '';
   public activeStatusDocID = '';
   public activeStatusMessage = '';
@@ -43,27 +50,22 @@ export class BannerEditorComponent implements OnInit {
   public activeStatusLinkURL = '';
   public statusMessage?: Observable<IStatusMessageDetail>;
 
-  constructor(
-    private _afs: AngularFirestore,
-    private _toastService: ToastsService,
-    private _cdRef: ChangeDetectorRef
-  ) {}
+  constructor(private _toastService: ToastsService, private _cdRef: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this._statusMessageCollection = this._afs.collection<IStatusMessage>(
-      FirebaseCollection.StatusMessage
-    );
-
-    this.statusMessage = this._statusMessageCollection.snapshotChanges().pipe(
-      map((messages) => {
-        const message = messages[0];
-        const data = message.payload.doc.data();
-        const docId = message.payload.doc.id;
-        return { docId, ...data };
-      })
-    );
-
-    this._subscriptions.add(this.statusMessage.subscribe(this.handleStatusMessage));
+    // this._statusMessageCollection = collection(
+    //   this.firestore,
+    //   FirebaseCollection.StatusMessage
+    // );
+    // this.statusMessage = onSnapshot(this._statusMessageCollection).pipe(
+    //   map((messages) => {
+    //     const message = messages[0];
+    //     const data = message.payload.doc.data();
+    //     const docId = message.payload.doc.id;
+    //     return { docId, ...data };
+    //   })
+    // );
+    // this._subscriptions.add(this.statusMessage.subscribe(this.handleStatusMessage));
   }
 
   private handleStatusMessage = (message: IStatusMessageDetail) => {
@@ -95,7 +97,7 @@ export class BannerEditorComponent implements OnInit {
       };
     }
 
-    await this._afs.doc(docPath).set(message);
+    await this.firestore.doc(docPath).set(message);
     this._toastService.addToast({
       message: 'Successfully updated status banner message',
     });

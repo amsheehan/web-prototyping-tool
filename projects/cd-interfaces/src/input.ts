@@ -40,6 +40,7 @@ export interface ISelectItem {
   selected?: boolean;
   action?: boolean;
   index?: number;
+  children?: any;
 }
 
 export enum InputType {

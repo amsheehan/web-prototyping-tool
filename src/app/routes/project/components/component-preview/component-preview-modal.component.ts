@@ -40,9 +40,9 @@ import { Route } from 'src/app/configs/routes.config';
 import { debounceTime, take } from 'rxjs/operators';
 import { deepCopy } from 'cd-utils/object';
 import { isCodeComponent } from 'cd-common/models';
-import type firebase from 'firebase/app';
 import * as config from './component-preview.config';
 import * as cd from 'cd-interfaces';
+import { Timestamp } from 'firebase/firestore';
 
 @Component({
   selector: 'app-component-preview-modal',
@@ -64,7 +64,7 @@ export class ComponentPreviewModalComponent
   public currentProject?: cd.IProject;
   public currentImportedVersionId?: string;
   public selectedVersionId?: string;
-  public selectedVersionTimestamp?: firebase.firestore.Timestamp;
+  public selectedVersionTimestamp?: Timestamp;
   // Used by publish to hold temp changes
   public publishEntryUpdate?: cd.IPublishEntry;
   public publishName = '';
@@ -123,7 +123,7 @@ export class ComponentPreviewModalComponent
     return this.published ? this.publishEntry?.owner.email : this.currentProject?.owner.email;
   }
 
-  get timestamp(): firebase.firestore.Timestamp | undefined {
+  get timestamp(): Timestamp | undefined {
     return this.selectedVersionTimestamp;
   }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { DocumentChangeAction } from '@angular/fire/firestore';
+import { DocumentChange } from '@angular/fire/firestore';
 import { getCommentsState, getComments, getCommentThreads } from '../selectors';
 import { IAppState, getRouterState } from 'src/app/store';
 import * as cd from 'cd-interfaces';
@@ -62,8 +62,8 @@ export class CommentThreadsEffects {
       }),
       switchMap((databaseActions) => {
         const storeActions = databaseActions.map((action) => {
-          const { type: entityType, payload } = action as DocumentChangeAction<{}>;
-          const docData = payload.doc.data() as cd.IProjectContentDocument;
+          const { type: entityType, doc } = action as DocumentChange<{}>;
+          const docData = doc.data() as cd.IProjectContentDocument;
 
           // determine if comment or comment thread
           const entity = dbContentTypeToActionMap[docData.type];

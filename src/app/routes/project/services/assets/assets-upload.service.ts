@@ -16,13 +16,13 @@
 
 import { AbstractStorageService } from '../../../../services/storage/abstract-storage.service';
 import { acceptedImageTypes, MAXIMUM_IMAGE_MB } from '../../configs/assets.config';
-import { AngularFirestore, AngularFirestoreDocument } from '@angular/fire/firestore';
+import { Firestore, doc } from '@angular/fire/firestore';
 import { AssetsService } from './assets.service';
 import { IAppState, getUser } from 'src/app/store';
 import { filter, first } from 'rxjs/operators';
 import { DatabaseService } from 'src/app/database/database.service';
 import { ProjectContentService } from 'src/app/database/changes/project-content.service';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable, Subscription, BehaviorSubject, lastValueFrom } from 'rxjs';
 import { projectContentsPathForId } from 'src/app/database/path.utils';
 import { ToastsService } from 'src/app/services/toasts/toasts.service';
@@ -55,13 +55,13 @@ export class AssetsUploadService {
   private _projectId?: string;
   private _userId?: string;
   private _project$: Observable<cd.IProject | undefined>;
+  private readonly firestore = inject(Firestore);
 
   public uploadStatusStream$ = new BehaviorSubject<UploadStatusType>({});
 
   constructor(
     private readonly _assetsService: AssetsService,
     private readonly _storageService: AbstractStorageService,
-    private readonly _afs: AngularFirestore,
     private readonly _databaseService: DatabaseService,
     private readonly _appStore: Store<IAppState>,
     private _projectContentService: ProjectContentService,
@@ -148,7 +148,9 @@ export class AssetsUploadService {
       // Store doc in database, but don't store blob urls in database
       const { urls, ...docWithoutBlobUrls } = asset;
       const docPath = projectContentsPathForId(docWithoutBlobUrls.id);
-      const docRef = this._afs.doc<cd.IProjectAsset>(docPath);
+
+      const docRef = doc(this.firestore, docPath);
+
       await this._databaseService.setDocument(docPath, docWithoutBlobUrls as cd.IProjectAsset);
 
       const remoteFilename = assetUtils.generateRemoteImageFilename(
@@ -244,7 +246,7 @@ export class AssetsUploadService {
   }
 
   private waitForUpload = (
-    docRef: AngularFirestoreDocument,
+    docRef: any, // TODO: find type dor docRef
     progressStream: Observable<number>,
     { id }: cd.IProjectAsset
   ): Promise<void> => {
@@ -252,10 +254,10 @@ export class AssetsUploadService {
 
     return lastValueFrom(
       docRef.valueChanges().pipe(
-        filter((data) => !!data && !!data.urls),
+        filter((data: any) => !!data && !!data.urls),
         first()
       )
-    ).then((data) => {
+    ).then((data: any) => {
       if (!data || !data.urls) return;
       this._assetsService.onUrlChangedFromRemote(id, data.urls);
     });

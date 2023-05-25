@@ -5,6 +5,7 @@ import {
   Firestore,
   doc,
   docData,
+  setDoc,
   collection,
   collectionData,
   query,
@@ -80,8 +81,7 @@ export class ProjectChangeCoordinator {
     private projectContentService: ProjectContentService,
     private undoRedoService: UndoRedoService,
     private presenceService: PresenceService,
-    private rtcService: RtcService,
-    private _afs: Firestore
+    private rtcService: RtcService
   ) {
     const user$ = this.store.pipe(select(getUser));
     this._userSubscription.add(user$.subscribe(this.onUserSubscription));
@@ -391,7 +391,10 @@ export class ProjectChangeCoordinator {
     for (const changeRequest of changeRequests) {
       const { payload, ...changeRequestDocContents } = changeRequest;
       const batch = new BatchChunker();
-      const changeRequestsCollection = collection(this._afs, FirebaseCollection.ChangeRequests);
+      const changeRequestsCollection = collection(
+        this.firestore,
+        FirebaseCollection.ChangeRequests
+      );
       const changeRequestDoc = await addDoc(changeRequestsCollection, {});
 
       // set contents of change request doc
@@ -401,31 +404,32 @@ export class ProjectChangeCoordinator {
       const payloadSubCollection = collection(changeRequestDoc, FirebaseField.Payload);
 
       for (const payloadItem of payload) {
-        const payloadDoc = docData(doc(payloadSubCollection));
+        const payloadDoc = doc(payloadSubCollection);
         const { sets, updates, deletes, ...payloadDocContents } = payloadItem;
 
         // set contents of payload doc
-        batch.set(payloadDoc.ref, payloadDocContents);
+        batch.set(payloadDoc, payloadDocContents);
 
         // Sets and updates are written to separate subcollections to provide scale. Deletes are
         // written as a simple string array to payload doc
         if (sets) {
-          const setSubCollection = payloadDoc.collection(FirebaseField.Sets);
+          // const setSubCollection = payloadDoc.collection(FirebaseField.Sets);
+          const setSubCollection = collection(this.firestore, FirebaseField.Sets);
           for (const set of sets) {
-            const setDoc = setSubCollection.doc();
-            batch.set(setDoc.ref, set);
+            const sd = doc(setSubCollection);
+            batch.set(sd, set);
           }
         }
         if (updates) {
-          const updateSubCollection = payloadDoc.collection(FirebaseField.Updates);
-          for (const update of updates) {
-            const updateDoc = updateSubCollection.doc();
-            batch.set(updateDoc.ref, update);
-          }
+          // const updateSubCollection = payloadDoc.collection(FirebaseField.Updates);
+          // for (const update of updates) {
+          //   const updateDoc = updateSubCollection.doc();
+          //   batch.set(updateDoc.ref, update);
+          // }
         }
-        if (deletes) {
-          batch.update(payloadDoc.ref, { deletes });
-        }
+        // if (deletes) {
+        //   batch.update(payloadDoc.ref, { deletes });
+        // }
       }
 
       // commit batch
@@ -443,9 +447,10 @@ export class ProjectChangeCoordinator {
     // Project has to be written first since Firestore rules for writing other project_content
     // documents depend on it existing
     const projectPath = projectPathForId(project.id);
-    await this.afs.doc(projectPath).set(project);
+    const docRef = doc(this.firestore, projectPath);
+    await setDoc(docRef, project);
 
-    const batch = new BatchChunker(this.afs);
+    const batch = new BatchChunker();
     const { payload } = changeRequest;
     for (const payloadItem of payload) {
       const { type, sets } = payloadItem;
@@ -455,8 +460,8 @@ export class ProjectChangeCoordinator {
 
       for (const set of sets) {
         const path = projectContentsPathForId(set.id);
-        const setDoc = this.afs.doc<cd.IBaseProjectDocument>(path);
-        batch.set(setDoc.ref, set);
+        const setDoc = doc(this.firestore, path);
+        batch.set(setDoc, set);
       }
     }
 
@@ -469,7 +474,7 @@ export class ProjectChangeCoordinator {
    * ids are no longer present in the remote database
    */
   private calcDeletionChanges = (
-    changes: firestore.DocumentChangeAction<cd.IProjectContentDocument>[]
+    changes: any[] // TODO: EatsBees give type
   ): cd.ChangePayload[] => {
     if (LOCAL_DATABASE_DISABLED) return [];
 

@@ -21,7 +21,7 @@ import { IAppState } from '../reducers';
 import * as settingsActions from '../actions/settings.action';
 import * as userActions from '../actions/user.action';
 import * as settingsSelectors from '../selectors/settings.selector';
-import { map, switchMap, withLatestFrom, filter, distinctUntilChanged, tap } from 'rxjs/operators';
+import { map, switchMap, withLatestFrom, distinctUntilChanged, tap } from 'rxjs/operators';
 import { IUser, IUserSettings } from 'cd-interfaces';
 import { RendererService } from 'src/app/services/renderer/renderer.service';
 import { DatabaseService } from 'src/app/database/database.service';
@@ -99,7 +99,6 @@ export class SettingsEffects {
         const settingsPath = settingsPathForId(user.id);
         return this._databaseService.getDocument(settingsPath);
       }),
-      filter((doc) => doc.exists),
       map((doc) => {
         return new settingsActions.SettingsRemoteModified(doc.data() as IUserSettings);
       })

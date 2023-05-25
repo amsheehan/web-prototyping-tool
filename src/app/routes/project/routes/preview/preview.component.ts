@@ -312,7 +312,7 @@ export class PreviewComponent implements OnInit, OnDestroy, AfterViewInit {
    */
   private sendAnalyticsFromEmbeddedProject() {
     try {
-      const topHost = window.top.location.hostname;
+      const topHost = window.top?.location.hostname;
       this.logAnalytics(AnalyticsEvent.PreviewOpen, { message: topHost });
     } catch (e) {
       this.logAnalytics(AnalyticsEvent.EmbedRendered);

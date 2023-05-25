@@ -75,7 +75,7 @@ export class QueryService implements OnDestroy {
         retry(3),
         first(), // Auto unsubscribe
         map((results) =>
-          results.reduce<IQueryResult<T>[]>((acc, doc) => {
+          results.reduce<IQueryResult<T>[]>((acc: any, doc) => {
             console.log('query.service.ts ln 75: ', doc, acc);
             const id = doc.id;
             const data = doc.data() as T;
@@ -95,7 +95,7 @@ export class QueryService implements OnDestroy {
       retry(3),
       first(), // Auto unsubscribe
       map((results) =>
-        results.reduce<IQueryResult<T>[]>((acc, doc) => {
+        results.reduce<IQueryResult<T>[]>((acc: any, doc) => {
           const id = doc.id;
           const data = doc.data() as T;
           if (!id) {
@@ -162,7 +162,7 @@ export class QueryService implements OnDestroy {
   ): Query {
     console.log('query.service.ts ln 170');
 
-    const lastEntryFn = [];
+    const lastEntryFn: any = [];
 
     if (lastEntry) {
       lastEntryFn.push(startAfter(lastEntry));

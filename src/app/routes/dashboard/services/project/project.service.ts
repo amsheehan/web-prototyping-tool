@@ -21,7 +21,7 @@ import {
   FirebaseOrderBy,
   FirebaseQueryOperation,
 } from 'cd-common/consts';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
 import {
   QueryService,
@@ -55,11 +55,10 @@ export class ProjectService extends QueryService {
 
   constructor(
     protected _screenshotService: ScreenshotService,
-    protected _afs: firestore.AngularFirestore,
     protected _databaseService: DatabaseService,
     private _appStore: Store<IAppState>
   ) {
-    super(_screenshotService, _afs, _databaseService);
+    super(_screenshotService, _databaseService);
   }
 
   reset() {

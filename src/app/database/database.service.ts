@@ -5,7 +5,7 @@ import {
   FirebaseField,
   FirebaseQueryOperation,
 } from 'cd-common/consts';
-import { map, first, takeUntil, switchMap, retry, filter, take } from 'rxjs/operators';
+import { map, first, takeUntil, switchMap, retry, filter } from 'rxjs/operators';
 import { BatchQueue, detectUndefinedObjects, RETRY_ATTEMPTS } from './database.utils';
 import { Observable, Subject, from, fromEvent } from 'rxjs';
 import { environment } from 'src/environments/environment';
@@ -113,7 +113,7 @@ export class DatabaseService {
     ).pipe(
       retry(RETRY_ATTEMPTS),
       first(), // Auto unsubscribe
-      map((data) => data.map((doc) => doc.data() as cd.IProjectContentDocument))
+      map((data) => data.map((d) => d.data() as cd.IProjectContentDocument))
     );
   }
 

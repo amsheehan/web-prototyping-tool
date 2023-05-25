@@ -16,8 +16,7 @@
 
 import * as cd from 'cd-interfaces';
 import * as consts from 'cd-common/consts';
-import { Injectable } from '@angular/core';
-import { AngularFireStorage } from '@angular/fire/storage';
+import { inject, Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { from, Observable, zip, of } from 'rxjs';
 import { map, catchError, switchMap, take } from 'rxjs/operators';
@@ -30,23 +29,19 @@ import { ToastsService } from '../toasts/toasts.service';
   providedIn: 'root',
 })
 export class ScreenshotService {
-  constructor(
-    private afStorage: AngularFireStorage,
-    private databaseService: DatabaseService,
-    private toastService: ToastsService
-  ) {}
+  private storage: Storage = inject(Storage);
+
+  constructor(private databaseService: DatabaseService, private toastService: ToastsService) {}
 
   getScreenshot(
     id: string,
     size: cd.ScreenshotSizes = cd.ScreenshotSizes.BigThumbnailXHDPI
-  ): Observable<cd.IScreenshotRef> {
-    return from(
-      this.afStorage.storage.ref(consts.SCREENSHOTS_PATH_PREFIX).child(id).listAll()
-    ).pipe(
-      map((results) => {
+  ): Observable<any> {
+    return from(this.storage.storage.ref(consts.SCREENSHOTS_PATH_PREFIX).child(id).listAll()).pipe(
+      map((results: any) => {
         const filename = consts.sizeToFileNameMap[size];
         if (!filename) throw new Error('Invalid screenshot size requested');
-        const ref = results.items.find((i) => i.name === filename);
+        const ref = results.items.find((i: any) => i.name === filename);
         if (!ref) throw new Error('No screenshot found for ' + id);
         return ref;
       }),

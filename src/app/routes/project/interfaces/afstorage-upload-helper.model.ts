@@ -14,46 +14,46 @@
  * limitations under the License.
  */
 
-import { BehaviorSubject, Subscription } from 'rxjs';
-import { AngularFireUploadTask } from '@angular/fire/storage';
-import { toDecimal } from 'cd-utils/numeric';
+import { BehaviorSubject } from 'rxjs';
+// import { BehaviorSubject, Subscription } from 'rxjs';
+// import { toDecimal } from 'cd-utils/numeric';
 
 export class AFStorageUploadHelper {
-  private subscriptions = new Subscription();
+  // private subscriptions = new Subscription();
   private readonly progressSubject: BehaviorSubject<number>;
 
-  constructor(private uploadTask: AngularFireUploadTask) {
+  constructor() {
     this.progressSubject = new BehaviorSubject<number>(0);
 
     this.setupPercentageChanges();
-    uploadTask.then(this.onComplete);
-    uploadTask.catch(this.onError);
+    // uploadTask.then(this.onComplete);
+    // uploadTask.catch(this.onError);
   }
 
   public getStream = () => this.progressSubject.asObservable();
 
-  private onComplete = () => {
-    const { progressSubject, subscriptions } = this;
-    progressSubject.complete();
-    subscriptions.unsubscribe();
-  };
+  // private onComplete = () => {
+  //   const { progressSubject, subscriptions } = this;
+  //   progressSubject.complete();
+  //   subscriptions.unsubscribe();
+  // };
 
-  private onError = (err: Error) => {
-    const { progressSubject, subscriptions } = this;
-    progressSubject.error(err);
-    subscriptions.unsubscribe();
-  };
+  // private onError = (err: Error) => {
+  //   const { progressSubject, subscriptions } = this;
+  //   progressSubject.error(err);
+  //   subscriptions.unsubscribe();
+  // };
 
   private setupPercentageChanges = () => {
-    const { uploadTask, subscriptions } = this;
-    subscriptions.add(uploadTask.percentageChanges().subscribe(this.onPercentageChanges));
+    // const { uploadTask, subscriptions } = this;
+    // subscriptions.add(uploadTask.percentageChanges().subscribe(this.onPercentageChanges));
   };
 
-  private onPercentageChanges = (percentage = 0) => {
-    // Percentage is number | undefined even though AngularFire
-    // documentation says it's always a number, and doesn't say when it can be
-    // undefined. Assuming undefined = 0%.
-    const progress = toDecimal(percentage);
-    this.progressSubject.next(progress);
-  };
+  // private onPercentageChanges = (percentage = 0) => {
+  //   // Percentage is number | undefined even though AngularFire
+  //   // documentation says it's always a number, and doesn't say when it can be
+  //   // undefined. Assuming undefined = 0%.
+  //   const progress = toDecimal(percentage);
+  //   this.progressSubject.next(progress);
+  // };
 }

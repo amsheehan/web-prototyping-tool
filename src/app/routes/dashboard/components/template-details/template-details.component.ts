@@ -18,7 +18,7 @@ import type { ILoadedTemplate, IProject } from 'cd-interfaces';
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter } from '@angular/core';
 import { AuthService } from 'src/app/services/auth/auth.service';
 import { ScreenshotService } from 'src/app/services/screenshot-lookup/screenshot-lookup.service';
-import type firebase from 'firebase/app';
+import { Timestamp } from 'firebase-admin/firestore';
 
 @Component({
   selector: 'app-template-details',
@@ -30,8 +30,8 @@ export class TemplateDetailsComponent {
   public name = '';
   public desc?: string;
   public author?: string;
-  public createdAt?: firebase.firestore.Timestamp;
-  public updatedAt?: firebase.firestore.Timestamp;
+  public createdAt?: Timestamp;
+  public updatedAt?: Timestamp;
   public version = 1;
   public images: string[] = [];
 

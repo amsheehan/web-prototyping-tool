@@ -15,10 +15,9 @@
  */
 
 import * as cd from 'cd-interfaces';
-import { Injectable, OnDestroy } from '@angular/core';
+import { inject, Injectable, OnDestroy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { AbstractStorageService } from 'src/app/services/storage/abstract-storage.service';
-import { AngularFireStorage } from '@angular/fire/storage';
 import { getBlobFromBlobUrl } from 'cd-utils/files';
 
 @Injectable({
@@ -26,18 +25,16 @@ import { getBlobFromBlobUrl } from 'cd-utils/files';
 })
 export class UploadService implements OnDestroy {
   private _subscriptions = new Subscription();
+  private storage: Storage = inject(Storage);
 
-  constructor(
-    private readonly _storageService: AbstractStorageService,
-    private afs: AngularFireStorage
-  ) {}
+  constructor(private readonly _storageService: AbstractStorageService) {}
 
   ngOnDestroy() {
     this._subscriptions.unsubscribe();
   }
 
   downloadFile = async (path: string): Promise<Blob> => {
-    const fileRef = this.afs.storage.ref(path);
+    const fileRef = this.storage.ref(path);
     const downloadUrl = await fileRef.getDownloadURL();
     const blob = await getBlobFromBlobUrl(downloadUrl);
     return blob;
@@ -48,7 +45,7 @@ export class UploadService implements OnDestroy {
   };
 
   getFileMetadata = async (path: string): Promise<cd.IFirebaseStorageFileMetadata | undefined> => {
-    const fileRef = this.afs.storage.ref(path);
+    const fileRef = this.storage.ref(path);
     const metadata: cd.IFirebaseStorageFileMetadata | undefined = await fileRef.getMetadata();
     return metadata;
   };

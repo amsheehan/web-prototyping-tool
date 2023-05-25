@@ -19,13 +19,13 @@ import {
   OnInit,
   ChangeDetectionStrategy,
   OnDestroy,
-  ChangeDetectorRef,
+  // ChangeDetectorRef,
 } from '@angular/core';
 import { environment } from 'src/environments/environment';
 import { AbstractBannerDirective } from '../abstract.banner';
-import { DatabaseService } from 'src/app/database/database.service';
-import { FirebaseCollection } from 'cd-common/consts';
-import { take } from 'rxjs/operators';
+// import { DatabaseService } from 'src/app/database/database.service';
+// import { FirebaseCollection } from 'cd-common/consts';
+// import { take } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { IStatusMessage } from '../../../interfaces/status-banner.interface';
 
@@ -42,9 +42,9 @@ export class StatusBannerComponent extends AbstractBannerDirective implements On
   public showBanner = false;
   private _subscription = Subscription.EMPTY;
 
-  constructor(private _db: DatabaseService, private _cdRef: ChangeDetectorRef) {
-    super();
-  }
+  // constructor (private _db: DatabaseService, private _cdRef: ChangeDetectorRef) {
+  //   super();
+  // }
 
   ngOnInit() {
     if (environment.e2e) {
@@ -52,18 +52,18 @@ export class StatusBannerComponent extends AbstractBannerDirective implements On
       return;
     }
 
-    this._subscription = this._db
-      .getCollection(FirebaseCollection.StatusMessage, (ref) => ref.limit(1))
-      .pipe(take(1))
-      .subscribe((value) => {
-        const msg = value && (value[0] as IStatusMessage);
-        if (msg) {
-          const status = window.localStorage.getItem(STATUS_ID);
-          this.showBanner = status !== msg.id;
-          this.status = msg;
-          this._cdRef.markForCheck();
-        }
-      });
+    // this._subscription = this._db
+    //   .getCollection(FirebaseCollection.StatusMessage, (ref) => ref.limit(1))
+    //   .pipe(take(1))
+    //   .subscribe((value) => {
+    //     const msg = value && (value[0] as IStatusMessage);
+    //     if (msg) {
+    //       const status = window.localStorage.getItem(STATUS_ID);
+    //       this.showBanner = status !== msg.id;
+    //       this.status = msg;
+    //       this._cdRef.markForCheck();
+    //     }
+    //   });
   }
 
   onDismiss() {

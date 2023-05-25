@@ -14,15 +14,23 @@
  * limitations under the License.
  */
 
-import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { IMenuConfig, INewsItem } from 'cd-interfaces';
+import { inject, Component, ChangeDetectionStrategy } from '@angular/core';
+import { IMenuConfig } from 'cd-interfaces';
 import { HELP_MENU_CONFIG } from 'src/app/configs/help-menu.config';
-import { Store } from '@ngrx/store';
-import { IAppState } from 'src/app/store';
-import { openLinkInNewTab } from 'cd-utils/url';
-import { DatabaseService } from 'src/app/database/database.service';
+// import { Store } from '@ngrx/store';
+// import { IAppState } from 'src/app/store';
+// import { openLinkInNewTab } from 'cd-utils/url';
 import { Observable } from 'rxjs';
 import { FirebaseCollection, FirebaseField, FirebaseOrderBy } from 'cd-common/consts';
+import {
+  Firestore,
+  collection,
+  collectionData,
+  query,
+  orderBy,
+  limit,
+  DocumentData,
+} from '@angular/fire/firestore';
 
 const MAX_NEWS_ITEMS = 20;
 
@@ -33,16 +41,21 @@ const MAX_NEWS_ITEMS = 20;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AboutPanelComponent {
+  private readonly firestore = inject(Firestore);
   public feedbackMenu: IMenuConfig[] = HELP_MENU_CONFIG;
-  public newsFeed: Observable<INewsItem[]> = this._db.getCollection(
-    FirebaseCollection.NewsUpdates,
-    (ref) => ref.orderBy(FirebaseField.Date, FirebaseOrderBy.Desc).limit(MAX_NEWS_ITEMS)
+  public newsFeed$: Observable<DocumentData[]> = collectionData(
+    query(
+      collection(this.firestore, FirebaseCollection.NewsUpdates),
+      orderBy(FirebaseField.Date, FirebaseOrderBy.Desc),
+      limit(MAX_NEWS_ITEMS)
+    )
   );
 
-  constructor(private _appStore: Store<IAppState>, private _db: DatabaseService) {}
+  // constructor (private _appStore: Store<IAppState>) { }
 
   onLinkButtonClick(item: IMenuConfig) {
-    if (item.action) return this._appStore.dispatch({ type: item.action });
-    openLinkInNewTab(String(item.value));
+    console.log({ item });
+    // if (item.action) return this._appStore.dispatch({ type: item.action });
+    // openLinkInNewTab(String(item.value));
   }
 }

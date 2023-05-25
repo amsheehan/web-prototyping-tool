@@ -15,15 +15,15 @@
  */
 
 import {
+  inject,
   Component,
   OnInit,
   ChangeDetectionStrategy,
   OnDestroy,
   ChangeDetectorRef,
 } from '@angular/core';
-import { AngularFireStorage } from '@angular/fire/storage';
+import { Storage, ref, listAll, ListResult, getDownloadURL } from '@angular/fire/storage';
 import { forkJoin, from, Observable, Subscription } from 'rxjs';
-import firebase from 'firebase/app';
 import { map, switchMap } from 'rxjs/operators';
 
 const ROOT_FOLDER = 'image-capture-tests';
@@ -41,24 +41,25 @@ interface IImageCapture {
 })
 export class VisualRegressionComponent implements OnInit, OnDestroy {
   private _subscription = new Subscription();
+  private storage: Storage = inject(Storage);
   public folders: string[] = [];
   public imagesA?: Observable<IImageCapture[]>;
   public imagesB?: Observable<IImageCapture[]>;
   public activeA = 0;
   public activeB = 1;
 
-  constructor(private _afStorage: AngularFireStorage, private _cdRef: ChangeDetectorRef) {}
+  constructor(private _cdRef: ChangeDetectorRef) {}
 
   ngOnDestroy(): void {
     this._subscription.unsubscribe();
   }
 
   ngOnInit(): void {
-    const folders$ = from(this._afStorage.storage.ref(ROOT_FOLDER).listAll());
+    const folders$ = from(listAll(ref(this.storage, ROOT_FOLDER)));
     this._subscription.add(folders$.subscribe(this.onInitalFolderLoad));
   }
 
-  onInitalFolderLoad = (res: firebase.storage.ListResult) => {
+  onInitalFolderLoad = (res: ListResult) => {
     this.folders = res.prefixes.map((item) => item.name);
     this._cdRef.markForCheck();
     this.loadFolderA();
@@ -82,9 +83,9 @@ export class VisualRegressionComponent implements OnInit, OnDestroy {
   }
 
   getFolderContentsObservable(path: string) {
-    return from(this._afStorage.storage.ref(ROOT_FOLDER).child(path).listAll()).pipe(
-      switchMap(this.processImages)
-    );
+    const l = listAll(ref(this.storage, `${ROOT_FOLDER}/${path}`)); // list child paths???
+
+    return from(l).pipe(switchMap(this.processImages));
   }
 
   loadFolderA = () => {
@@ -92,9 +93,9 @@ export class VisualRegressionComponent implements OnInit, OnDestroy {
     this.imagesA = this.getFolderContentsObservable(path);
   };
 
-  processImages = (res: firebase.storage.ListResult): Observable<IImageCapture[]> => {
+  processImages = (res: ListResult): Observable<IImageCapture[]> => {
     const imageStream = res.items.map((item) =>
-      from(item.getDownloadURL()).pipe(map((url) => ({ name: item.name, url })))
+      from(getDownloadURL(item)).pipe(map((url) => ({ name: item.name, url })))
     );
     return forkJoin([...imageStream]);
   };

@@ -118,12 +118,12 @@ export class PresenceService {
     return deleteDoc(doc(this.afs, presenceDocPath));
   }
 
-  private onOthersPresent = (othersPresent: cd.IUserPresence[]) => {
-    this.otherPresentUsers$.next(othersPresent);
+  // private onOthersPresent = (othersPresent: cd.IUserPresence[]) => {
+  //   this.otherPresentUsers$.next(othersPresent);
 
-    const othersPresentMap = new Map(othersPresent.map((o) => [o.sessionId, o]));
-    this.otherPresentUsersMap$.next(othersPresentMap);
-  };
+  //   const othersPresentMap = new Map(othersPresent.map((o) => [o.sessionId, o]));
+  //   this.otherPresentUsersMap$.next(othersPresentMap);
+  // };
 
   private onUserSubscription = (user?: cd.IUser) => {
     this._user = user;

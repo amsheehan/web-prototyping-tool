@@ -14,50 +14,72 @@
  * limitations under the License.
  */
 
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { AbstractStorageService } from './abstract-storage.service';
 import { ProgressStream } from '../../routes/project/interfaces/storage.interface';
-import { AngularFireStorage } from '@angular/fire/storage';
-import { AFStorageUploadHelper } from '../../routes/project/interfaces/afstorage-upload-helper.model';
+import { AFStorageUploadHelper } from 'src/app/routes/project/interfaces/afstorage-upload-helper.model';
+import { Storage, ref, deleteObject } from '@angular/fire/storage';
+// import { Storage, ref, uploadBytesResumable, deleteObject } from '@angular/fire/storage';
 import { IStringMap } from 'cd-interfaces';
-import { Observable } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
-import { HttpClient } from '@angular/common/http';
+// import { switchMap } from 'rxjs/operators';
 
-const CACHE_CONTROL = 'private, max-age=31536000';
+// const CACHE_CONTROL = 'private, max-age=31536000';
 
 @Injectable({
   providedIn: 'root',
 })
 export class FireStorageService extends AbstractStorageService {
-  constructor(private afStorage: AngularFireStorage, private httpService: HttpClient) {
+  private storage: Storage = inject(Storage);
+
+  constructor() {
     super();
   }
 
   uploadFile(path: string, blob: Blob, metadata?: IStringMap<string>): ProgressStream {
-    const uploadTask = this.afStorage.upload(path, blob, {
-      customMetadata: metadata,
-      cacheControl: CACHE_CONTROL,
-    });
-    const helper = new AFStorageUploadHelper(uploadTask);
+    console.log({ metadata });
+    // const storageRef = ref(this.storage, path);
+
+    // const uploadTask = uploadBytesResumable(storageRef, blob);
+
+    const helper = new AFStorageUploadHelper();
 
     return helper.getStream();
   }
 
-  copyFile(srcPath: string, destPath: string, metadata?: IStringMap<string>): ProgressStream {
-    return this._downloadFile(srcPath).pipe(
-      switchMap((blob) => this.uploadFile(destPath, blob, metadata))
-    );
-  }
+  // async copyFile(srcPath: string, destPath: string, metadata?: IStringMap<string>): Promise<any> {
+  //   const blob = await this._downloadFile(srcPath)
+  //   return this.uploadFile(destPath, blob as Blob, metadata);
+  // }
 
   deleteFile(path: string): void {
-    this.afStorage.ref(path).delete();
+    const fileRef = ref(this.storage, path);
+
+    deleteObject(fileRef)
+      .then(() => {
+        console.log(path, ' deleted');
+      })
+      .catch((error: any) => {
+        console.error({ error });
+      });
   }
 
-  private _downloadFile = (path: string): Observable<Blob> => {
-    const downloadUrls$ = this.afStorage.ref(path).getDownloadURL();
-    return downloadUrls$.pipe(
-      switchMap((url) => this.httpService.get(url, { responseType: 'blob' }))
-    );
-  };
+  // private _downloadFile = async (path: string): Promise<Blob | undefined> => {
+  //   const fileRef = ref(this.storage, path);
+
+  //   const downloadUrl = await getDownloadURL(fileRef);
+
+  //   const xhr = new XMLHttpRequest();
+  //   xhr.responseType = 'blob';
+  //   xhr.onload = (event: any) => {
+  //     const b = xhr.response;
+  //     return b;
+  //   };
+  //   xhr.open('GET', downloadUrl);
+  //   xhr.send();
+
+  //   return undefined;
+  //   // return downloadUrls$.pipe(
+  //   //   switchMap((url) => this.httpService.get(url, { responseType: 'blob' }))
+  //   // );
+  // };
 }

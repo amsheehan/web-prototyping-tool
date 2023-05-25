@@ -31,7 +31,7 @@ import { Observable, Subscription } from 'rxjs';
 import { SymbolScreenshotsService } from '../../services/symbol-screenshots/symbol-screenshots.service';
 import { take } from 'rxjs/operators';
 import { AuthService } from 'src/app/services/auth/auth.service';
-import type firebase from 'firebase/app';
+import { Timestamp } from 'firebase/firestore';
 
 @Component({
   selector: 'app-publish-entry-tile',
@@ -48,7 +48,7 @@ export class PublishEntryTileComponent implements OnDestroy {
   public name = '';
   public desc = '';
   public tags: string[] = [];
-  public timestamp?: firebase.firestore.Timestamp;
+  public timestamp?: Timestamp;
   public userDetails$?: Observable<Partial<cd.IUser> | undefined>;
 
   @Output() selectEntry = new EventEmitter<cd.IPublishEntry>();

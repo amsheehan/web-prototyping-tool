@@ -30,9 +30,9 @@ export abstract class AbstractStorageService {
 
   public abstract deleteFile(path: string): void;
 
-  public abstract copyFile(
-    srcPath: string,
-    destPath: string,
-    metadata?: IStringMap<string>
-  ): ProgressStream;
+  // public abstract copyFile(
+  //   srcPath: string,
+  //   destPath: string,
+  //   metadata?: IStringMap<string>
+  // ): ProgressStream;
 }

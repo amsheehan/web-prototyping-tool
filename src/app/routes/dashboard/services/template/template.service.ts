@@ -41,7 +41,7 @@ export class TemplateService {
   public getProjectTemplates = (): Observable<cd.ILoadedTemplate[]> => {
     const publishEntries$ = this._databaseService.getCollection<cd.IPublishEntry>(
       FirebaseCollection.PublishEntries,
-      (ref) =>
+      (ref: any) =>
         ref.where(
           FirebaseField.DocumentType,
           FirebaseQueryOperation.Equals,
@@ -53,16 +53,14 @@ export class TemplateService {
       switchMap((publishEntries) => {
         if (!publishEntries.length) return of([]);
 
-        const projectRequests: Observable<PublishEntryWithProject>[] = publishEntries.map(
-          (entry) => {
-            const latestVersion = entry.versions[0];
-            const projectPath = projectPathForId(latestVersion.projectId);
-            const project$ = this._databaseService.getDocumentData<cd.IProject>(projectPath);
+        const projectRequests: Observable<any>[] = publishEntries.map((entry) => {
+          const latestVersion = entry.versions[0];
+          const projectPath = projectPathForId(latestVersion.projectId);
+          const project$ = this._databaseService.getDocumentData<cd.IProject>(projectPath);
 
-            // using forkJoin here allows creating PublishEntryWithProject tuple
-            return forkJoin([of(entry), project$]);
-          }
-        );
+          // using forkJoin here allows creating PublishEntryWithProject tuple
+          return forkJoin([of(entry), project$]);
+        });
         return forkJoin(projectRequests);
       }),
       // filter out any undefined

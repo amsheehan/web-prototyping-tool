@@ -16,9 +16,8 @@
 
 import type * as cd from 'cd-interfaces';
 import * as consts from 'cd-common/consts';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import * as firestore from '@angular/fire/firestore';
 import { PresenceService } from '../presence/presence.service';
 import {
   parseRtcMessage,
@@ -34,6 +33,7 @@ import {
   stringifyRtcMessage,
 } from './rtc.messages';
 import { isDisconnected } from './rtc.utils';
+import { Firestore, collection, doc, setDoc, docSnapshots } from '@angular/fire/firestore';
 
 const RTC_DATA_CHANNEL = 'cd_RtcDataChannel';
 const RTC_CONFIG = {
@@ -55,17 +55,17 @@ export class RtcService {
   private _usersMap = new Map<string, cd.IUserPresence>();
   private _cursorPositions = new Map<string, cd.IUserCursor>();
   private _peerSelectionMap = new Map<string, cd.IUserSelection>();
-
   private rtcConnections = new Map<string, RTCPeerConnection>();
   private rtcDataChannels = new Map<RTCPeerConnection, RTCDataChannel>();
   private openRtcDataChannels = new WeakMap<RTCDataChannel, boolean>();
-  private answeredPeerConnections = new Set<RTCPeerConnection>();
+  // private answeredPeerConnections = new Set<RTCPeerConnection>();
+  private readonly firestore = inject(Firestore);
 
   public peerCursors$ = new BehaviorSubject<cd.IUserCursor[]>([]);
   public peerSelection$ = new BehaviorSubject<cd.IUserSelection[]>([]);
   public peerChangeRequest$ = new Subject<RtcMessageChangeRequest>();
 
-  constructor(private presenceService: PresenceService, private afs: firestore.AngularFirestore) {
+  constructor(private presenceService: PresenceService) {
     this.presenceService.currentPresence$.subscribe(this.onCurrentUserPresence);
     this.presenceService.otherPresentUsers$.subscribe(this.onOtherUsers);
   }
@@ -107,9 +107,8 @@ export class RtcService {
     const unConnectedUsers = existingUsers.filter((u) => !this.rtcConnections.has(u.sessionId));
 
     if (!unConnectedUsers.length) return;
-    const rtcCollection = this.afs.collection<cd.IRtcConnectionRequest>(
-      consts.FirebaseCollection.RtcConnections
-    );
+
+    const rtcCollection = collection(this.firestore, consts.FirebaseCollection.RtcConnections);
 
     for (const user of unConnectedUsers) {
       this.rtcLog('Initiating RTC connections to unconnected/existing users', unConnectedUsers);
@@ -125,9 +124,9 @@ export class RtcService {
       await peerConnection.setLocalDescription(offer);
 
       // Add connection request to database
-      const rtcDoc = rtcCollection.doc();
+      const rtcDoc = doc(rtcCollection);
 
-      rtcDoc.set({
+      await setDoc(rtcDoc, {
         fromSessionId: _currentPresence.sessionId,
         toSessionId: user.sessionId,
         rtcOfferDesc: { sdp: offer.sdp, type: offer.type },
@@ -135,14 +134,16 @@ export class RtcService {
       });
 
       // Collect ICE candidates
-      peerConnection.addEventListener('icecandidate', (event) => {
-        if (!event.candidate) return;
-        this.rtcLog('Got candidate: ', event.candidate);
+      // TODO
+      // peerConnection.addEventListener('icecandidate', (event) => {
+      //   if (!event.candidate) return;
+      //   this.rtcLog('Got candidate: ', event.candidate);
 
-        // Add iceCandidate to a subcollection of fromUserIceCandidates
-        const iceCandidate = event.candidate.toJSON();
-        rtcDoc.collection(consts.FirebaseCollection.fromUserIceCandidates).add(iceCandidate);
-      });
+      //   // Add iceCandidate to a subcollection of fromUserIceCandidates
+      //   const iceCandidate = event.candidate.toJSON();
+
+      //   rtcDoc.collection(consts.FirebaseCollection.fromUserIceCandidates).add(iceCandidate);
+      // });
     }
   };
 
@@ -152,14 +153,16 @@ export class RtcService {
     const { _currentPresence } = this;
     if (!_currentPresence) return;
 
-    const connectionRequestsToCurrentUser = this.afs.collection<cd.IRtcConnectionRequest>(
-      consts.FirebaseCollection.RtcConnections,
-      (ref) => {
-        return ref.where('toSessionId', '==', _currentPresence.sessionId);
-      }
-    );
+    let res: any;
 
-    connectionRequestsToCurrentUser.snapshotChanges().subscribe(async (snapshotChanges) => {
+    // const connectionRequestsToCurrentUser$ = collectionData(
+    //   query(
+    //     collection(this.firestore, consts.FirebaseCollection.RtcConnections),
+    //     where('toSessionId', '==', _currentPresence.sessionId)
+    //   )
+    // ).subscribe((data) => res = data);
+
+    docSnapshots(res).subscribe(async (snapshotChanges: any) => {
       for (const change of snapshotChanges) {
         const rtcDocRef = change.payload.doc.ref;
         const connectionRequest = change.payload.doc.data();
@@ -197,8 +200,8 @@ export class RtcService {
         // Listen for Ice Candidates from remote
         rtcDocRef
           .collection(consts.FirebaseCollection.fromUserIceCandidates)
-          .onSnapshot((snapshot) => {
-            snapshot.docChanges().forEach((snapshotChange) => {
+          .onSnapshot((snapshot: any) => {
+            snapshot.docChanges().forEach((snapshotChange: any) => {
               if (snapshotChange.type !== 'added') return; // only add new iceCandidates
               const iceCandidate = new RTCIceCandidate(snapshotChange.doc.data());
               this.rtcLog('Adding ice candidate from fromUser', iceCandidate);
@@ -210,56 +213,51 @@ export class RtcService {
   };
 
   respondToRtcConnectionAnswers = () => {
-    this.rtcLog('RtcService: respondToRtcConnectionAnswers');
-
-    const { _currentPresence } = this;
-    if (!_currentPresence) return;
-    const { sessionId } = _currentPresence;
-    const answeredConnectionsToCurrentUserRequests = this.afs.collection<cd.IRtcConnectionRequest>(
-      consts.FirebaseCollection.RtcConnections,
-      (ref) => {
-        return ref.where('fromSessionId', '==', sessionId).where('rtcAnswerDesc', '!=', null);
-      }
-    );
-
-    answeredConnectionsToCurrentUserRequests
-      .snapshotChanges()
-      .subscribe(async (snapshotChanges) => {
-        for (const change of snapshotChanges) {
-          const docRef = change.payload.doc.ref;
-          const connectionRequest = change.payload.doc.data();
-
-          // lookup peerConnection that we already created to this user
-          const peerConnection = this.rtcConnections.get(connectionRequest.toSessionId);
-          if (
-            !peerConnection ||
-            !connectionRequest.rtcAnswerDesc ||
-            this.answeredPeerConnections.has(peerConnection)
-          ) {
-            continue;
-          }
-
-          // add answer to peerConnection for this user
-          this.rtcLog('Received answer to rtc connection request - calling setRemoteDescription');
-          const answer = new RTCSessionDescription(connectionRequest.rtcAnswerDesc);
-          this.answeredPeerConnections.add(peerConnection);
-          await peerConnection.setRemoteDescription(answer);
-
-          // Listen for Ice Candidates from remote
-          // Need to wait until we have setRemoteDescription with answer before adding ice Candidates
-          docRef
-            .collection(consts.FirebaseCollection.toUserIceCandidates)
-            .onSnapshot((snapshot) => {
-              snapshot.docChanges().forEach((snapshotChange) => {
-                if (snapshotChange.type !== 'added') return; // only add new iceCandidates
-                const iceCandidateData = snapshotChange.doc.data();
-                const iceCandidate = new RTCIceCandidate(iceCandidateData);
-                this.rtcLog('Adding ice candidate from toUser', iceCandidate);
-                peerConnection.addIceCandidate(iceCandidate);
-              });
-            });
-        }
-      });
+    // this.rtcLog('RtcService: respondToRtcConnectionAnswers');
+    // const { _currentPresence } = this;
+    // if (!_currentPresence) return;
+    // const { sessionId } = _currentPresence;
+    // const answeredConnectionsToCurrentUserRequests = this.afs.collection<cd.IRtcConnectionRequest>(
+    //   consts.FirebaseCollection.RtcConnections,
+    //   (ref: any) => {
+    //     return ref.where('fromSessionId', '==', sessionId).where('rtcAnswerDesc', '!=', null);
+    //   }
+    // );
+    // answeredConnectionsToCurrentUserRequests
+    //   .snapshotChanges()
+    //   .subscribe(async (snapshotChanges: any) => {
+    //     for (const change of snapshotChanges) {
+    //       const docRef = change.payload.doc.ref;
+    //       const connectionRequest = change.payload.doc.data();
+    //       // lookup peerConnection that we already created to this user
+    //       const peerConnection = this.rtcConnections.get(connectionRequest.toSessionId);
+    //       if (
+    //         !peerConnection ||
+    //         !connectionRequest.rtcAnswerDesc ||
+    //         this.answeredPeerConnections.has(peerConnection)
+    //       ) {
+    //         continue;
+    //       }
+    //       // add answer to peerConnection for this user
+    //       this.rtcLog('Received answer to rtc connection request - calling setRemoteDescription');
+    //       const answer = new RTCSessionDescription(connectionRequest.rtcAnswerDesc);
+    //       this.answeredPeerConnections.add(peerConnection);
+    //       await peerConnection.setRemoteDescription(answer);
+    //       // Listen for Ice Candidates from remote
+    //       // Need to wait until we have setRemoteDescription with answer before adding ice Candidates
+    //       docRef
+    //         .collection(consts.FirebaseCollection.toUserIceCandidates)
+    //         .onSnapshot((snapshot: any) => {
+    //           snapshot.docChanges().forEach((snapshotChange: any) => {
+    //             if (snapshotChange.type !== 'added') return; // only add new iceCandidates
+    //             const iceCandidateData = snapshotChange.doc.data();
+    //             const iceCandidate = new RTCIceCandidate(iceCandidateData);
+    //             this.rtcLog('Adding ice candidate from toUser', iceCandidate);
+    //             peerConnection.addIceCandidate(iceCandidate);
+    //           });
+    //         });
+    //     }
+    //   });
   };
 
   addDataChannel = (peerConnection: RTCPeerConnection, dataChannel: RTCDataChannel) => {

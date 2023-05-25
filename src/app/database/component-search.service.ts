@@ -23,10 +23,17 @@ import {
   FirebaseField,
   FirebaseOrderBy,
   FirebaseQueryOperation,
+  UNICODE_RANGE_MAX,
 } from 'cd-common/consts';
-import * as firestore from '@angular/fire/firestore';
 import * as cd from 'cd-interfaces';
-import firebase from 'firebase/app';
+import {
+  collection,
+  collectionData,
+  query,
+  where,
+  orderBy,
+  startAfter,
+} from '@angular/fire/firestore';
 
 @Injectable()
 export class ComponentSearchService extends QueryService {
@@ -68,33 +75,37 @@ export class ComponentSearchService extends QueryService {
     if (_end || loading) return;
     this.loading = true;
     this._requestSubscription.unsubscribe();
-    this._requestSubscription = this.getCollection<cd.IPublishEntry>(
-      FirebaseCollection.PublishEntries,
-      (ref) =>
-        this.buildUsernameSearchQuery(ref, username, _latestEntry, [
-          cd.PublishType.CodeComponent,
-          cd.PublishType.Symbol,
-        ])
-    ).subscribe((data) => {
-      if (username === currentUser.email) return this.onUserRequestComplete(data, '');
-      return this.onOthersRequestComplete(data, '');
-    });
-  }
 
-  buildOwnQuery(
-    ref: firestore.CollectionReference,
-    query: string,
-    userId: string
-  ): firestore.Query {
-    return ref
-      .where(FirebaseField.DocumentType, FirebaseQueryOperation.In, [
-        cd.PublishType.CodeComponent,
-        cd.PublishType.Symbol,
-      ])
-      .where(FirebaseField.Keywords, FirebaseQueryOperation.Contains, query)
-      .orderBy(FirebaseField.Keywords, FirebaseOrderBy.Asc)
-      .where(FirebaseField.OwnerId, FirebaseQueryOperation.Equals, userId)
-      .orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc);
+    const lastEntryFn: any = [];
+
+    if (_latestEntry) {
+      lastEntryFn.push(startAfter(_latestEntry));
+
+      const results$ = collectionData(
+        query(
+          collection(this.firestore, FirebaseCollection.PublishEntries),
+          where(FirebaseField.OwnerEmail, FirebaseQueryOperation.GreaterThanOrEqualTo, username),
+          where(
+            FirebaseField.OwnerEmail,
+            FirebaseQueryOperation.LessThanOrEqualTo,
+            username + UNICODE_RANGE_MAX
+          ),
+          where(FirebaseField.DocumentType, FirebaseQueryOperation.In, [
+            cd.PublishType.CodeComponent,
+            cd.PublishType.Symbol,
+          ]),
+          orderBy(FirebaseField.OwnerEmail, FirebaseOrderBy.Asc),
+          orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc),
+          ...lastEntryFn
+        )
+      );
+
+      results$.subscribe((data) => {
+        if (username === currentUser.email)
+          return this.onUserRequestComplete(data as IPublishEntryQueryResult[], '');
+        return this.onOthersRequestComplete(data as IPublishEntryQueryResult[], '');
+      });
+    }
   }
 
   onUserRequestComplete = (data: IPublishEntryQueryResult[], _query: string) => {
@@ -102,13 +113,24 @@ export class ComponentSearchService extends QueryService {
     this.userLoading$.next(false);
   };
 
-  searchOwnPublishedComponents(query: string, uid: string) {
+  searchOwnPublishedComponents(q: string, uid: string) {
     this.userLoading$.next(true);
     this._userRequestSubscription.unsubscribe();
-    this._userRequestSubscription = this.getCollection<cd.IPublishEntry>(
-      FirebaseCollection.PublishEntries,
-      (ref) => this.buildOwnQuery(ref, query, uid)
-    ).subscribe((data) => this.onUserRequestComplete(data, query));
+    const request$ = collectionData(
+      query(
+        collection(this.firestore, FirebaseCollection.PublishEntries),
+        where(FirebaseField.DocumentType, FirebaseQueryOperation.In, [
+          cd.PublishType.CodeComponent,
+          cd.PublishType.Symbol,
+        ]),
+        where(FirebaseField.Keywords, FirebaseQueryOperation.Contains, q),
+        orderBy(FirebaseField.Keywords, FirebaseOrderBy.Asc),
+        where(FirebaseField.OwnerId, FirebaseQueryOperation.Equals, uid),
+        orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc)
+      )
+    ).subscribe((data) => this.onUserRequestComplete(data as IPublishEntryQueryResult[], q));
+
+    this._userRequestSubscription.add(request$);
   }
 
   onOthersRequestComplete = (publishEntryResults: IPublishEntryQueryResult[], uid: string) => {
@@ -121,33 +143,26 @@ export class ComponentSearchService extends QueryService {
     this.loading = false;
   };
 
-  searchOthersPublishedComponents(query: string, uid: string) {
-    const { loading, _latestEntry, _end } = this;
+  searchOthersPublishedComponents(q: string, uid: string) {
+    const { loading, _end } = this;
     if (_end || loading) return;
     this.loading = true;
     this._requestSubscription.unsubscribe();
-    this._requestSubscription = this.getCollection<cd.IPublishEntry>(
-      FirebaseCollection.PublishEntries,
-      (ref) => this.buildOthersQuery(ref, query, _latestEntry)
-    ).subscribe((data) => this.onOthersRequestComplete(data, uid));
-  }
 
-  buildOthersQuery(
-    ref: firestore.CollectionReference,
-    query: string,
-    lastEntry?: firebase.firestore.QueryDocumentSnapshot<unknown>
-  ): firestore.Query {
-    let reference = ref
-      .where(FirebaseField.DocumentType, FirebaseQueryOperation.In, [
-        cd.PublishType.CodeComponent,
-        cd.PublishType.Symbol,
-      ])
-      .where(FirebaseField.Keywords, FirebaseQueryOperation.Contains, query)
-      .orderBy(FirebaseField.Keywords, FirebaseOrderBy.Asc)
-      .orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc);
+    const results$ = collectionData(
+      query(
+        collection(this.firestore, FirebaseCollection.PublishEntries),
+        where(FirebaseField.DocumentType, FirebaseQueryOperation.In, [
+          cd.PublishType.CodeComponent,
+          cd.PublishType.Symbol,
+        ]),
+        where(FirebaseField.Keywords, FirebaseQueryOperation.Contains, q),
+        orderBy(FirebaseField.Keywords, FirebaseOrderBy.Asc),
+        where(FirebaseField.OwnerId, FirebaseQueryOperation.Equals, uid),
+        orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc)
+      )
+    ).subscribe((data) => this.onUserRequestComplete(data as IPublishEntryQueryResult[], q));
 
-    if (lastEntry) reference = reference.startAfter(lastEntry);
-
-    return reference.limit(QueryService.BATCH_SIZE);
+    this._requestSubscription.add(results$);
   }
 }
