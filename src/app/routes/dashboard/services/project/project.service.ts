@@ -21,8 +21,8 @@ import {
   FirebaseOrderBy,
   FirebaseQueryOperation,
 } from 'cd-common/consts';
-import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, forkJoin, Observable } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { from, BehaviorSubject, forkJoin, Observable } from 'rxjs';
 import {
   QueryService,
   FirestoreDocSnapshot,
@@ -35,7 +35,17 @@ import { projectPathForId } from '../../../../database/path.utils';
 import { removeValueFromArrayAtIndex } from 'cd-utils/array';
 import { filter, finalize, map, tap } from 'rxjs/operators';
 import { IAppState, SettingsUpdate } from 'src/app/store';
-import * as firestore from '@angular/fire/firestore';
+import {
+  limit,
+  startAfter,
+  where,
+  orderBy,
+  query,
+  doc,
+  collection,
+  CollectionReference,
+  Query,
+} from '@angular/fire/firestore';
 import type * as cd from 'cd-interfaces';
 import { Store } from '@ngrx/store';
 import { environment } from 'src/environments/environment';
@@ -77,49 +87,53 @@ export class ProjectService extends QueryService {
   }
 
   buildAllRecentProjectsQuery(
-    ref: firestore.CollectionReference,
-    lastEntry?: FirestoreDocSnapshot
+    ref: CollectionReference
+    // lastEntry?: FirestoreDocSnapshot
   ) {
-    let reference = ref
-      .where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, DEFAULT_PROJECT_TYPE)
-      .orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc);
+    let q = query(
+      ref,
+      where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, DEFAULT_PROJECT_TYPE),
+      orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc),
+      limit(QueryService.BATCH_SIZE)
+    );
 
-    if (lastEntry) reference = reference.startAfter(lastEntry);
-
-    return reference.limit(QueryService.BATCH_SIZE);
+    return q;
   }
 
   buildProjectOwnerQuery(
-    ref: firestore.CollectionReference,
+    ref: CollectionReference,
     userId: string,
     lastEntry?: FirestoreDocSnapshot
-  ): firestore.Query {
-    let reference = ref
-      .where(FirebaseField.OwnerId, FirebaseQueryOperation.Equals, userId)
-      .where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, DEFAULT_PROJECT_TYPE)
-      .orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc);
+  ): Query {
+    let constraints = [
+      where(FirebaseField.OwnerId, FirebaseQueryOperation.Equals, userId),
+      where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, DEFAULT_PROJECT_TYPE),
+      orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc),
+      limit(QueryService.BATCH_SIZE),
+      startAfter(lastEntry),
+    ];
 
-    if (lastEntry) reference = reference.startAfter(lastEntry);
-
-    return reference.limit(QueryService.BATCH_SIZE);
+    return query(ref, ...constraints);
   }
 
   buildProjectEditorQuery(
-    ref: firestore.CollectionReference,
+    ref: CollectionReference,
     userId: string,
     userEmail: string,
     lastEntry?: FirestoreDocSnapshot
-  ): firestore.Query {
-    let reference = ref
-      .where(FirebaseField.Editor, FirebaseQueryOperation.Contains, userEmail)
-      .where(FirebaseField.OwnerId, FirebaseQueryOperation.NotEqualTo, userId)
-      .where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, DEFAULT_PROJECT_TYPE)
-      .orderBy(FirebaseField.OwnerId, FirebaseOrderBy.Asc)
-      .orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc);
+  ): Query {
+    let constraints: any[] = [
+      ref,
+      where(FirebaseField.Editor, FirebaseQueryOperation.Contains, userEmail),
+      where(FirebaseField.OwnerId, FirebaseQueryOperation.NotEqualTo, userId),
+      where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, DEFAULT_PROJECT_TYPE),
+      orderBy(FirebaseField.OwnerId, FirebaseOrderBy.Asc),
+      orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc),
+      limit(QueryService.BATCH_SIZE),
+      startAfter(lastEntry),
+    ];
 
-    if (lastEntry) reference = reference.startAfter(lastEntry);
-
-    return reference.limit(QueryService.BATCH_SIZE);
+    return query(...constraints);
   }
 
   mapProjectQueryResults = (results: IProjectQueryResult[]): cd.IProject[] => {
@@ -146,8 +160,10 @@ export class ProjectService extends QueryService {
     if (_end || loading) return;
     this.loading = true;
     this._requestSubscription.unsubscribe();
-    this.getCollection<cd.IProject>(FirebaseCollection.Projects, (ref) =>
-      this.buildAllRecentProjectsQuery(ref, _latestEntry)
+    const colRef = collection(this.firestore, FirebaseCollection.Projects);
+    this.getCollection<cd.IProject>(
+      FirebaseCollection.Projects,
+      this.buildAllRecentProjectsQuery(colRef, _latestEntry)
     )
       .pipe(tap(this.tapProjectPagination), map(this.mapProjectQueryResults))
       .subscribe(this.onRequestComplete);
@@ -169,24 +185,23 @@ export class ProjectService extends QueryService {
     const idsToRemove: string[] = [];
     const reqs$ = starred.map((id) => {
       const path = projectPathForId(id);
-      return this._afs
-        .doc(path)
-        .get()
-        .pipe(
-          map((doc) => {
-            if (!doc.exists) {
-              idsToRemove.push(id);
-              return;
-            }
-            return doc.data() as cd.IProject;
-          })
-        );
+      const docRef = doc(this.firestore, path);
+
+      return docRef.get().pipe(
+        map((doc: any) => {
+          if (!doc.exists) {
+            idsToRemove.push(id);
+            return;
+          }
+          return doc.data() as cd.IProject;
+        })
+      );
     });
 
     this._requestSubscription = forkJoin(reqs$)
       .pipe(
-        filter((project) => !!project),
-        map((args) => combineProjectsAndSortByDate([args as cd.IProject[]])),
+        filter((project: any) => !!project),
+        map((args: any) => combineProjectsAndSortByDate([args as cd.IProject[]])),
         // In the future, we handle pagination for stars manually
         finalize(() => {
           this._end = true;
@@ -218,13 +233,16 @@ export class ProjectService extends QueryService {
 
     this.loading = true;
 
-    const ownerProjects$ = this.getCollection<cd.IProject>(FirebaseCollection.Projects, (ref) => {
-      return this.buildProjectOwnerQuery(ref, uid, this._latestEntry);
-    }).pipe(tap(this.tapProjectPagination), map(this.mapProjectQueryResults));
+    const colRef = collection(this.firestore, FirebaseCollection.Projects);
+    const ownerProjects$ = this.getCollection<cd.IProject>(
+      FirebaseCollection.Projects,
+      this.buildProjectOwnerQuery(colRef, uid, this._latestEntry)
+    ).pipe(tap(this.tapProjectPagination), map(this.mapProjectQueryResults));
 
-    const editorProjects$ = this.getCollection<cd.IProject>(FirebaseCollection.Projects, (ref) => {
-      return this.buildProjectEditorQuery(ref, uid, email, this._latestEditorEntry);
-    }).pipe(tap(this.tapEditorPagination), map(this.mapProjectQueryResults));
+    const editorProjects$ = this.getCollection<cd.IProject>(
+      FirebaseCollection.Projects,
+      this.buildProjectEditorQuery(colRef, uid, email, this._latestEditorEntry)
+    ).pipe(tap(this.tapEditorPagination), map(this.mapProjectQueryResults));
 
     const req: Observable<cd.IProject[]>[] = [];
     if (!this._end) req.push(ownerProjects$);

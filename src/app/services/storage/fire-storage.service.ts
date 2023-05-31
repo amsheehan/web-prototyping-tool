@@ -18,7 +18,7 @@ import { inject, Injectable } from '@angular/core';
 import { AbstractStorageService } from './abstract-storage.service';
 import { ProgressStream } from '../../routes/project/interfaces/storage.interface';
 import { AFStorageUploadHelper } from 'src/app/routes/project/interfaces/afstorage-upload-helper.model';
-import { Storage, ref, deleteObject } from '@angular/fire/storage';
+import { Storage, ref, deleteObject, uploadBytesResumable } from '@angular/fire/storage';
 // import { Storage, ref, uploadBytesResumable, deleteObject } from '@angular/fire/storage';
 import { IStringMap } from 'cd-interfaces';
 // import { switchMap } from 'rxjs/operators';
@@ -37,9 +37,10 @@ export class FireStorageService extends AbstractStorageService {
 
   uploadFile(path: string, blob: Blob, metadata?: IStringMap<string>): ProgressStream {
     console.log({ metadata });
-    // const storageRef = ref(this.storage, path);
+    const storageRef = ref(this.storage, path);
 
     // const uploadTask = uploadBytesResumable(storageRef, blob);
+    uploadBytesResumable(storageRef, blob);
 
     const helper = new AFStorageUploadHelper();
 

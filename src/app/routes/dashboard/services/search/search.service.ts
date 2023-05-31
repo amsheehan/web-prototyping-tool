@@ -26,8 +26,7 @@ import { mergeProjects } from 'src/app/database/query.service.utils';
 import { removeValueFromArrayAtIndex } from 'cd-utils/array';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 import { Injectable } from '@angular/core';
-import firebase from 'firebase/app';
-import * as firestore from '@angular/fire/firestore';
+import { collection, query, where, orderBy, startAfter, limit } from '@angular/fire/firestore';
 import type * as cd from 'cd-interfaces';
 import { getLastQueryResultContainingKeywords } from './search.service.utils';
 import { environment } from 'src/environments/environment';
@@ -69,14 +68,21 @@ export class ProjectSearchService extends QueryService {
       this.reset(username);
     }
     if (!environment.databaseEnabled) return;
+
     const { loading, _latestEntry, _end } = this;
+
     if (_end || loading) return;
+
     this.loading = true;
     this._requestSubscription.unsubscribe();
-    const userSearch$ = this.getCollection<cd.IProject>(FirebaseCollection.Projects, (ref) => {
-      return this.buildUsernameSearchQuery(ref, username, _latestEntry);
-    });
-    this._requestSubscription = userSearch$.subscribe((data) =>
+
+    const colRef = collection(this.firestore, FirebaseCollection.UserSettings);
+    const userSearch$ = this.getCollection<cd.IProject>(
+      FirebaseCollection.Projects,
+      this.buildUsernameSearchQuery(colRef, username, _latestEntry)
+    );
+
+    this._requestSubscription = userSearch$.subscribe((data: any) =>
       this.onOthersRequestComplete(data, '')
     );
   }
@@ -99,11 +105,13 @@ export class ProjectSearchService extends QueryService {
     if (!environment.databaseEnabled) return;
     this.userLoading$.next(true);
     this._userRequestSubscription.unsubscribe();
-    const ownProjects$ = this.getCollection<cd.IProject>(FirebaseCollection.Projects, (ref) => {
-      return this.buildOwnQuery(ref, query, uid);
-    });
+    const colRef = collection(this.firestore, FirebaseCollection.Projects);
+    const ownProjects$ = this.getCollection<cd.IProject>(
+      FirebaseCollection.Projects,
+      this.buildOwnQuery(colRef, query, uid)
+    );
 
-    this._userRequestSubscription = ownProjects$.subscribe((data) =>
+    this._userRequestSubscription = ownProjects$.subscribe((data: any) =>
       this.onUserRequestComplete(data, query)
     );
   }
@@ -126,47 +134,47 @@ export class ProjectSearchService extends QueryService {
     if (_end || loading) return;
     this.loading = true;
     this._requestSubscription.unsubscribe();
-    const othersRequest$ = this.getCollection<cd.IProject>(FirebaseCollection.Projects, (ref) => {
-      return this.buildOthersQuery(ref, query, _latestEntry);
-    });
-    this._requestSubscription = othersRequest$.subscribe((data) => {
+
+    const colRef = collection(this.firestore, FirebaseCollection.UserSettings);
+    const othersRequest$ = this.getCollection<cd.IProject>(
+      FirebaseCollection.Projects,
+      this.buildOthersQuery(colRef, query, _latestEntry)
+    );
+
+    this._requestSubscription = othersRequest$.subscribe((data: any) => {
       return this.onOthersRequestComplete(data, uid);
     });
   }
 
-  buildOwnQuery(
-    ref: firestore.CollectionReference,
-    query: string,
-    userId: string
-  ): firestore.Query {
-    return (
-      ref
-        // where('keywords', 'array-includes', query)
-        .where(FirebaseField.Keywords, FirebaseQueryOperation.Contains, query)
-        // where('owner.id', '==', userId)
-        .where(FirebaseField.OwnerId, FirebaseQueryOperation.Equals, userId)
-        // where('type', '==', 'Default')
-        .where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, DEFAULT_PROJECT_TYPE)
-        .orderBy(FirebaseField.Keywords, FirebaseOrderBy.Asc)
-        .orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc)
+  buildOwnQuery(ref: any, q: string, userId: string): any {
+    return query(
+      ref,
+      where('keywords', 'array-contains', q),
+      where(FirebaseField.Keywords, FirebaseQueryOperation.Contains, q),
+      where('owner.id', '==', userId),
+      where(FirebaseField.OwnerId, FirebaseQueryOperation.Equals, userId),
+      where('type', '==', 'Default'),
+      where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, DEFAULT_PROJECT_TYPE),
+      orderBy(FirebaseField.Keywords, FirebaseOrderBy.Asc),
+      orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc)
     );
   }
 
-  buildOthersQuery(
-    ref: firestore.CollectionReference,
-    query: string,
-    lastEntry?: firebase.firestore.QueryDocumentSnapshot<unknown>
-  ): firestore.Query {
-    let reference = ref
-      // where('keywords', 'array-includes', query)
-      .where(FirebaseField.Keywords, FirebaseQueryOperation.Contains, query)
-      // where('type', '==', 'Default')
-      .where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, DEFAULT_PROJECT_TYPE)
-      .orderBy(FirebaseField.Keywords, FirebaseOrderBy.Asc)
-      .orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc);
+  buildOthersQuery(ref: any, q: string, lastEntry?: any): any {
+    let reference = query(
+      ref,
+      where('keywords', 'array-contains', q),
+      where(FirebaseField.Keywords, FirebaseQueryOperation.Contains, q),
+      where('type', '==', 'Default'),
+      where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, DEFAULT_PROJECT_TYPE),
+      orderBy(FirebaseField.Keywords, FirebaseOrderBy.Asc),
+      orderBy(FirebaseField.LastUpdatedAt, FirebaseOrderBy.Desc),
+      startAfter(lastEntry),
+      limit(QueryService.BATCH_SIZE)
+    );
 
-    if (lastEntry) reference = reference.startAfter(lastEntry);
+    if (lastEntry) reference = reference;
 
-    return reference.limit(QueryService.BATCH_SIZE);
+    return reference;
   }
 }

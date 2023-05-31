@@ -63,18 +63,14 @@ export class QueryService implements OnDestroy {
     protected _databaseService: DatabaseService
   ) {}
 
-  getCollection<T extends cd.IBaseDocument>(
-    ref: string,
-    queryExpressions?: QueryConstraint[]
-  ): Observable<IQueryResult<T>[]> {
+  getCollection<T extends cd.IBaseDocument>(ref: string, q?: Query): Observable<IQueryResult<T>[]> {
     console.log('query.service.ts ln 59', { ref });
-    const collectionRef = collection(this.firestore, ref);
 
-    if (queryExpressions) {
-      return collectionData(query(collectionRef, ...queryExpressions)).pipe(
+    if (q) {
+      return collectionData(q).pipe(
         retry(3),
         first(), // Auto unsubscribe
-        map((results) =>
+        map((results: any) =>
           results.reduce<IQueryResult<T>[]>((acc: any, doc) => {
             console.log('query.service.ts ln 75: ', doc, acc);
             const id = doc.id;
@@ -94,7 +90,7 @@ export class QueryService implements OnDestroy {
     return collectionData(collection(this.firestore, ref)).pipe(
       retry(3),
       first(), // Auto unsubscribe
-      map((results) =>
+      map((results: any) =>
         results.reduce<IQueryResult<T>[]>((acc: any, doc) => {
           const id = doc.id;
           const data = doc.data() as T;

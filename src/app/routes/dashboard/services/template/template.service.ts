@@ -16,6 +16,7 @@
 
 import { FirebaseCollection, FirebaseField, FirebaseQueryOperation } from 'cd-common/consts';
 import { Injectable } from '@angular/core';
+import { where } from '@angular/fire/firestore';
 import { Observable, forkJoin, of } from 'rxjs';
 import { DatabaseService } from 'src/app/database/database.service';
 import { switchMap, map } from 'rxjs/operators';
@@ -39,15 +40,9 @@ export class TemplateService {
   ) {}
 
   public getProjectTemplates = (): Observable<cd.ILoadedTemplate[]> => {
-    const publishEntries$ = this._databaseService.getCollection<cd.IPublishEntry>(
-      FirebaseCollection.PublishEntries,
-      (ref: any) =>
-        ref.where(
-          FirebaseField.DocumentType,
-          FirebaseQueryOperation.Equals,
-          cd.PublishType.Template
-        )
-    );
+    const publishEntries$ = this._databaseService.getCollection(FirebaseCollection.PublishEntries, [
+      where(FirebaseField.DocumentType, FirebaseQueryOperation.Equals, cd.PublishType.Template),
+    ]);
 
     const projectTemplates$: Observable<cd.ILoadedTemplate[]> = publishEntries$.pipe(
       switchMap((publishEntries) => {
